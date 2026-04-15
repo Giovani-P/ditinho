@@ -30,6 +30,20 @@ export default async function ClienteDetailPage({
 
   const totalGasto = cliente.pedidos.reduce((acc, p) => acc + p.valor, 0)
 
+  // Agrupar produtos de todos os pedidos
+  const todosProdutos = cliente.pedidos.flatMap(pedido => {
+    try {
+      const itens = JSON.parse(pedido.itens) as Array<{ nome: string; quantidade?: number; valor?: number; precoUnit?: number }>
+      return itens.map(item => ({
+        ...item,
+        dataPedido: pedido.createdAt,
+        pedidoNum: pedido.numeroCiss ?? `#${pedido.id.slice(-6).toUpperCase()}`,
+      }))
+    } catch {
+      return []
+    }
+  }).sort((a, b) => new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime())
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-6">
@@ -61,6 +75,49 @@ export default async function ClienteDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Histórico de Produtos */}
+      {todosProdutos.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <h2 className="font-semibold text-gray-900">
+              Histórico de Produtos ({todosProdutos.length})
+            </h2>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50">
+                    <th className="text-left py-3 px-4 text-gray-600 font-semibold">Produto</th>
+                    <th className="text-left py-3 px-4 text-gray-600 font-semibold">Quantidade</th>
+                    <th className="text-left py-3 px-4 text-gray-600 font-semibold">Valor Unit.</th>
+                    <th className="text-left py-3 px-4 text-gray-600 font-semibold">Pedido</th>
+                    <th className="text-left py-3 px-4 text-gray-600 font-semibold">Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {todosProdutos.map((produto, idx) => (
+                    <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-gray-900 font-medium">{produto.nome}</td>
+                      <td className="py-3 px-4 text-gray-700">{produto.quantidade || '—'}</td>
+                      <td className="py-3 px-4 text-gray-700">
+                        {produto.precoUnit ? `R$ ${Number(produto.precoUnit).toFixed(2)}` : produto.valor ? `R$ ${Number(produto.valor).toFixed(2)}` : '—'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="font-mono text-gray-600 text-xs">{produto.pedidoNum}</span>
+                      </td>
+                      <td className="py-3 px-4 text-gray-500 text-xs">
+                        {new Date(produto.dataPedido).toLocaleDateString('pt-BR')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-3 gap-6 mb-6">
         <div className="col-span-1">
