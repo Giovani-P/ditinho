@@ -89,7 +89,7 @@ export default async function RelatoriosPage() {
           <CardHeader><h2 className="font-semibold text-gray-900">Pedidos por Status (Mês)</h2></CardHeader>
           <CardContent>
             {pedidosPorStatus.length === 0 ? (
-              <p className="text-gray-400 text-sm">Nenhum dado</p>
+              <p className="text-gray-600 text-sm">Nenhum dado</p>
             ) : (
               <div className="space-y-3">
                 {pedidosPorStatus.map(s => {
@@ -128,7 +128,7 @@ export default async function RelatoriosPage() {
           <CardHeader><h2 className="font-semibold text-gray-900">Performance Entregadores (Mês)</h2></CardHeader>
           <CardContent>
             {entregadoresPerf.length === 0 ? (
-              <p className="text-gray-400 text-sm">Nenhum entregador cadastrado</p>
+              <p className="text-gray-600 text-sm">Nenhum entregador cadastrado</p>
             ) : (
               <div className="space-y-3">
                 {entregadoresPerf.map(e => {
@@ -140,7 +140,7 @@ export default async function RelatoriosPage() {
                     <div key={e.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                       <div>
                         <p className="font-medium text-gray-900 text-sm">{e.user.nome}</p>
-                        <p className="text-xs text-gray-400">{e.tipo === 'MOTO' ? '🏍️' : '🚚'} {e.tipo}</p>
+                        <p className="text-xs text-gray-600">{e.tipo === 'MOTO' ? '🏍️' : '🚚'} {e.tipo}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900 text-sm">{entregues}/{total}</p>
@@ -164,7 +164,7 @@ export default async function RelatoriosPage() {
         </CardHeader>
         <CardContent className="p-0">
           {topClientes.filter(c => c.pedidos.length > 0).length === 0 ? (
-            <p className="text-center py-8 text-gray-400">Nenhum pedido no mês</p>
+            <p className="text-center py-8 text-gray-600">Nenhum pedido no mês</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
@@ -180,7 +180,7 @@ export default async function RelatoriosPage() {
                   .filter(c => c.pedidos.length > 0)
                   .map((c, i) => (
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50">
-                      <td className="py-3 px-6 font-bold text-gray-400">{i + 1}</td>
+                      <td className="py-3 px-6 font-bold text-gray-600">{i + 1}</td>
                       <td className="py-3 px-6 font-medium text-gray-900">{c.nome}</td>
                       <td className="py-3 px-6">{c.pedidos.length} pedidos</td>
                       <td className="py-3 px-6 font-semibold text-green-600">

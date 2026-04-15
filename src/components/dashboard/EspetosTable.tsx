@@ -11,7 +11,7 @@ interface EspetosTableProps {
 export function EspetosTable({ espetos, onStatusChange }: EspetosTableProps) {
   if (espetos.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400">
+      <div className="text-center py-12 text-gray-600">
         <p className="text-4xl mb-2">📦</p>
         <p className="font-medium">Nenhum espeto encontrado</p>
         <p className="text-sm">Os espetos aparecerão aqui quando pedidos forem confirmados para entrega</p>
@@ -40,11 +40,11 @@ export function EspetosTable({ espetos, onStatusChange }: EspetosTableProps) {
               <td className="py-3 px-4 font-mono font-bold text-gray-700">#{espeto.numero}</td>
               <td className="py-3 px-4">
                 <p className="font-medium text-gray-900">{espeto.cliente.nome}</p>
-                <p className="text-gray-400 text-xs">{espeto.cliente.telefone}</p>
+                <p className="text-gray-600 text-xs">{espeto.cliente.telefone}</p>
               </td>
               <td className="py-3 px-4">
                 <p className="text-gray-700">{espeto.cliente.endereco}</p>
-                <p className="text-gray-400 text-xs">{espeto.cliente.bairro}</p>
+                <p className="text-gray-600 text-xs">{espeto.cliente.bairro}</p>
               </td>
               <td className="py-3 px-4">
                 <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
@@ -57,7 +57,7 @@ export function EspetosTable({ espetos, onStatusChange }: EspetosTableProps) {
               </td>
               <td className="py-3 px-4 text-gray-700">
                 {espeto.entregador?.user.nome ?? (
-                  <span className="text-gray-400 italic">Não designado</span>
+                  <span className="text-gray-600 italic">Não designado</span>
                 )}
               </td>
               <td className="py-3 px-4">{statusEspetoBadge(espeto.status)}</td>
