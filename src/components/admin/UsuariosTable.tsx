@@ -29,6 +29,8 @@ const perfilLabel: Record<string, { label: string; cor: string }> = {
 export function UsuariosTable({ usuarios, currentUserId }: Props) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({ email: '', novaSenha: '' })
 
   async function toggleAtivo(id: string, ativo: boolean) {
     setLoadingId(id)
@@ -38,6 +40,25 @@ export function UsuariosTable({ usuarios, currentUserId }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ativo: !ativo }),
       })
+      router.refresh()
+    } finally {
+      setLoadingId(null)
+    }
+  }
+
+  async function salvarEdicao(id: string) {
+    setLoadingId(id)
+    try {
+      await fetch(`/api/usuarios/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: editForm.email || undefined,
+          senha: editForm.novaSenha || undefined,
+        }),
+      })
+      setEditandoId(null)
+      setEditForm({ email: '', novaSenha: '' })
       router.refresh()
     } finally {
       setLoadingId(null)
@@ -83,20 +104,63 @@ export function UsuariosTable({ usuarios, currentUserId }: Props) {
                 </span>
               </td>
               <td className="py-3 px-4">
-                {isCurrent ? (
+                {editandoId === u.id ? (
+                  <div className="space-y-2">
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={editForm.email}
+                      onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                      className="w-full text-xs border border-gray-200 rounded px-2 py-1"
+                    />
+                    <input
+                      type="password"
+                      placeholder="Nova senha"
+                      value={editForm.novaSenha}
+                      onChange={e => setEditForm({ ...editForm, novaSenha: e.target.value })}
+                      className="w-full text-xs border border-gray-200 rounded px-2 py-1"
+                    />
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => salvarEdicao(u.id)}
+                        disabled={loading}
+                        className="flex-1 text-xs bg-blue-600 text-white rounded px-2 py-1 disabled:opacity-50"
+                      >
+                        {loading ? '...' : 'Salvar'}
+                      </button>
+                      <button
+                        onClick={() => setEditandoId(null)}
+                        className="flex-1 text-xs border border-gray-200 rounded px-2 py-1"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : isCurrent ? (
                   <span className="text-xs text-gray-400 italic">Você</span>
                 ) : (
-                  <button
-                    onClick={() => toggleAtivo(u.id, u.ativo)}
-                    disabled={loading}
-                    className={`text-xs px-3 py-1 rounded-lg border transition-colors disabled:opacity-50 ${
-                      u.ativo
-                        ? 'border-red-200 text-red-600 hover:bg-red-50'
-                        : 'border-green-200 text-green-600 hover:bg-green-50'
-                    }`}
-                  >
-                    {loading ? '...' : u.ativo ? 'Desativar' : 'Ativar'}
-                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => {
+                        setEditandoId(u.id)
+                        setEditForm({ email: u.email, novaSenha: '' })
+                      }}
+                      className="flex-1 text-xs border border-blue-200 text-blue-600 hover:bg-blue-50 rounded px-2 py-1"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      onClick={() => toggleAtivo(u.id, u.ativo)}
+                      disabled={loading}
+                      className={`flex-1 text-xs rounded px-2 py-1 border transition-colors disabled:opacity-50 ${
+                        u.ativo
+                          ? 'border-red-200 text-red-600 hover:bg-red-50'
+                          : 'border-green-200 text-green-600 hover:bg-green-50'
+                      }`}
+                    >
+                      {loading ? '...' : u.ativo ? 'Desativar' : 'Ativar'}
+                    </button>
+                  </div>
                 )}
               </td>
             </tr>
