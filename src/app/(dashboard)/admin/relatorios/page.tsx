@@ -6,14 +6,28 @@ import { StatsCard } from '@/components/dashboard/StatsCard'
 import { PeriodFilter } from '@/components/admin/PeriodFilter'
 import { Suspense } from 'react'
 
-type Period = 'diario' | 'semanal' | 'quinzenal' | 'mensal'
+type Period = 'diario' | 'semanal' | 'quinzenal' | 'mensal' | 'customizado'
 
-function calculateDateRange(periodo: Period) {
+function calculateDateRange(periodo: Period, dataInicio?: string, dataFim?: string) {
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
   const inicio = new Date(hoje)
-  const mesLabel = (() => {
+
+  let mesLabel: string
+  let endDate = new Date()
+  endDate.setHours(23, 59, 59, 999)
+
+  if (periodo === 'customizado' && dataInicio && dataFim) {
+    const [anoI, mesI, diaI] = dataInicio.split('-').map(Number)
+    const [anoF, mesF, diaF] = dataFim.split('-').map(Number)
+    inicio.setFullYear(anoI, mesI - 1, diaI)
+    endDate.setFullYear(anoF, mesF - 1, diaF)
+    mesLabel = `${dataInicio} a ${dataFim}`
+    return { inicio, endDate, mesLabel }
+  }
+
+  mesLabel = (() => {
     if (periodo === 'diario') return hoje.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     if (periodo === 'semanal') return `Semana de ${new Date(hoje.getTime() - hoje.getDay() * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}`
     if (periodo === 'quinzenal') {
@@ -25,26 +39,26 @@ function calculateDateRange(periodo: Period) {
 
   switch (periodo) {
     case 'diario':
-      return { inicio: hoje, mesLabel }
+      return { inicio: hoje, endDate, mesLabel }
     case 'semanal':
       inicio.setDate(hoje.getDate() - hoje.getDay())
-      return { inicio, mesLabel }
+      return { inicio, endDate, mesLabel }
     case 'quinzenal':
       const quinzenaInicio = Math.ceil(hoje.getDate() / 15)
       inicio.setDate((quinzenaInicio - 1) * 15 + 1)
-      return { inicio, mesLabel }
+      return { inicio, endDate, mesLabel }
     case 'mensal':
     default:
       inicio.setDate(1)
-      return { inicio, mesLabel }
+      return { inicio, endDate, mesLabel }
   }
 }
 
-async function RelatoriosContent({ periodo }: { periodo: Period }) {
+async function RelatoriosContent({ periodo, dataInicio, dataFim }: { periodo: Period; dataInicio?: string; dataFim?: string }) {
   const session = await auth()
   if (!session || session.user.perfil !== 'ADMIN') redirect('/')
 
-  const { inicio: inicioData, mesLabel } = calculateDateRange(periodo)
+  const { inicio: inicioData, endDate: fimData, mesLabel } = calculateDateRange(periodo, dataInicio, dataFim)
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
@@ -58,28 +72,28 @@ async function RelatoriosContent({ periodo }: { periodo: Period }) {
     pedidosPorStatus, entregadoresPerf,
     topClientes,
   ] = await Promise.all([
-    prisma.pedido.count({ where: { createdAt: { gte: inicioData } } }),
+    prisma.pedido.count({ where: { createdAt: { gte: inicioData, lte: fimData } } }),
     prisma.pedido.count({ where: { createdAt: { gte: inicioSemana } } }),
     prisma.pedido.count({ where: { createdAt: { gte: hoje } } }),
 
-    prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: inicioData } } }),
+    prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: inicioData, lte: fimData } } }),
     prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: inicioSemana } } }),
     prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: hoje } } }),
 
-    prisma.espeto.count({ where: { status: 'ENTREGUE', updatedAt: { gte: inicioData } } }),
-    prisma.espeto.count({ where: { status: 'PROBLEMA', updatedAt: { gte: inicioData } } }),
+    prisma.espeto.count({ where: { status: 'ENTREGUE', updatedAt: { gte: inicioData, lte: fimData } } }),
+    prisma.espeto.count({ where: { status: 'PROBLEMA', updatedAt: { gte: inicioData, lte: fimData } } }),
 
     prisma.pedido.groupBy({
       by: ['status'],
       _count: { _all: true },
-      where: { createdAt: { gte: inicioData } },
+      where: { createdAt: { gte: inicioData, lte: fimData } },
     }),
 
     prisma.entregador.findMany({
       include: {
         user: { select: { nome: true } },
         espetos: {
-          where: { updatedAt: { gte: inicioData } },
+          where: { updatedAt: { gte: inicioData, lte: fimData } },
           select: { status: true },
         },
       },
@@ -90,7 +104,7 @@ async function RelatoriosContent({ periodo }: { periodo: Period }) {
         _count: { select: { pedidos: true } },
         pedidos: {
           select: { valor: true },
-          where: { createdAt: { gte: inicioData } },
+          where: { createdAt: { gte: inicioData, lte: fimData } },
         },
       },
       orderBy: { pedidos: { _count: 'desc' } },
@@ -231,9 +245,11 @@ async function RelatoriosContent({ periodo }: { periodo: Period }) {
   )
 }
 
-export default async function RelatoriosPage({ searchParams }: { searchParams: Promise<{ periodo?: string }> }) {
+export default async function RelatoriosPage({ searchParams }: { searchParams: Promise<{ periodo?: string; dataInicio?: string; dataFim?: string }> }) {
   const params = await searchParams
   const periodo = (params.periodo || 'mensal') as Period
+  const dataInicio = params.dataInicio
+  const dataFim = params.dataFim
 
   return (
     <div className="p-8">
@@ -244,7 +260,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: P
       <PeriodFilter />
 
       <Suspense fallback={<div className="text-center py-8">Carregando dados...</div>}>
-        <RelatoriosContent periodo={periodo} />
+        <RelatoriosContent periodo={periodo} dataInicio={dataInicio} dataFim={dataFim} />
       </Suspense>
     </div>
   )
