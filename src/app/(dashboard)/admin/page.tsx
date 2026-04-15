@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { StatsCard } from '@/components/dashboard/StatsCard'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
 import { statusEspetoBadge, pagamentoBadge } from '@/components/ui/Badge'
+import { WhatsAppStatus } from '@/components/admin/WhatsAppStatus'
 
 export default async function AdminPage() {
   const session = await auth()
@@ -32,11 +33,14 @@ export default async function AdminPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard Geral</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard Geral</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+        <WhatsAppStatus />
       </div>
 
       {/* KPIs */}
