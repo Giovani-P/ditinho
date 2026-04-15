@@ -3,47 +3,83 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
 import { StatsCard } from '@/components/dashboard/StatsCard'
+import { PeriodFilter } from '@/components/admin/PeriodFilter'
+import { Suspense } from 'react'
 
-export default async function RelatoriosPage() {
-  const session = await auth()
-  if (!session || session.user.perfil !== 'ADMIN') redirect('/')
+type Period = 'diario' | 'semanal' | 'quinzenal' | 'mensal'
 
+function calculateDateRange(periodo: Period) {
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
-  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+  const inicio = new Date(hoje)
+  const mesLabel = (() => {
+    if (periodo === 'diario') return hoje.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    if (periodo === 'semanal') return `Semana de ${new Date(hoje.getTime() - hoje.getDay() * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}`
+    if (periodo === 'quinzenal') {
+      const quinzenaNum = Math.ceil(hoje.getDate() / 15)
+      return `${quinzenaNum}ª quinzena de ${hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`
+    }
+    return hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  })()
+
+  switch (periodo) {
+    case 'diario':
+      return { inicio: hoje, mesLabel }
+    case 'semanal':
+      inicio.setDate(hoje.getDate() - hoje.getDay())
+      return { inicio, mesLabel }
+    case 'quinzenal':
+      const quinzenaInicio = Math.ceil(hoje.getDate() / 15)
+      inicio.setDate((quinzenaInicio - 1) * 15 + 1)
+      return { inicio, mesLabel }
+    case 'mensal':
+    default:
+      inicio.setDate(1)
+      return { inicio, mesLabel }
+  }
+}
+
+async function RelatoriosContent({ periodo }: { periodo: Period }) {
+  const session = await auth()
+  if (!session || session.user.perfil !== 'ADMIN') redirect('/')
+
+  const { inicio: inicioData, mesLabel } = calculateDateRange(periodo)
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
+
   const inicioSemana = new Date(hoje)
   inicioSemana.setDate(hoje.getDate() - hoje.getDay())
 
   const [
-    pedidosMes, pedidosSemana, pedidosHoje,
-    faturamentoMes, faturamentoSemana, faturamentoHoje,
-    entreguesMes, problemasMes,
+    pedidosPeriodo, pedidosSemana, pedidosHoje,
+    faturamentoPeriodo, faturamentoSemana, faturamentoHoje,
+    entreguesPeriodo, problemasPeriodo,
     pedidosPorStatus, entregadoresPerf,
     topClientes,
   ] = await Promise.all([
-    prisma.pedido.count({ where: { createdAt: { gte: inicioMes } } }),
+    prisma.pedido.count({ where: { createdAt: { gte: inicioData } } }),
     prisma.pedido.count({ where: { createdAt: { gte: inicioSemana } } }),
     prisma.pedido.count({ where: { createdAt: { gte: hoje } } }),
 
-    prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: inicioMes } } }),
+    prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: inicioData } } }),
     prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: inicioSemana } } }),
     prisma.pedido.aggregate({ _sum: { valor: true }, where: { createdAt: { gte: hoje } } }),
 
-    prisma.espeto.count({ where: { status: 'ENTREGUE', updatedAt: { gte: inicioMes } } }),
-    prisma.espeto.count({ where: { status: 'PROBLEMA', updatedAt: { gte: inicioMes } } }),
+    prisma.espeto.count({ where: { status: 'ENTREGUE', updatedAt: { gte: inicioData } } }),
+    prisma.espeto.count({ where: { status: 'PROBLEMA', updatedAt: { gte: inicioData } } }),
 
     prisma.pedido.groupBy({
       by: ['status'],
       _count: { _all: true },
-      where: { createdAt: { gte: inicioMes } },
+      where: { createdAt: { gte: inicioData } },
     }),
 
     prisma.entregador.findMany({
       include: {
         user: { select: { nome: true } },
         espetos: {
-          where: { updatedAt: { gte: inicioMes } },
+          where: { updatedAt: { gte: inicioData } },
           select: { status: true },
         },
       },
@@ -54,7 +90,7 @@ export default async function RelatoriosPage() {
         _count: { select: { pedidos: true } },
         pedidos: {
           select: { valor: true },
-          where: { createdAt: { gte: inicioMes } },
+          where: { createdAt: { gte: inicioData } },
         },
       },
       orderBy: { pedidos: { _count: 'desc' } },
@@ -62,14 +98,12 @@ export default async function RelatoriosPage() {
     }),
   ])
 
-  const taxaEntrega = (entreguesMes + problemasMes) > 0
-    ? ((entreguesMes / (entreguesMes + problemasMes)) * 100).toFixed(1)
+  const taxaEntrega = (entreguesPeriodo + problemasPeriodo) > 0
+    ? ((entreguesPeriodo / (entreguesPeriodo + problemasPeriodo)) * 100).toFixed(1)
     : '—'
 
-  const mesLabel = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-
   return (
-    <div className="p-8">
+    <>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Relatórios</h1>
         <p className="text-gray-500 text-sm mt-1">Dados de {mesLabel}</p>
@@ -77,23 +111,23 @@ export default async function RelatoriosPage() {
 
       {/* KPIs gerais */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard title="Pedidos no Mês" value={pedidosMes} icon="📋" color="blue" subtitle={`${pedidosSemana} esta semana · ${pedidosHoje} hoje`} />
-        <StatsCard title="Faturamento Mês" value={`R$ ${(faturamentoMes._sum.valor ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon="💰" color="green" subtitle={`Semana: R$ ${(faturamentoSemana._sum.valor ?? 0).toFixed(2)}`} />
-        <StatsCard title="Entregas OK" value={entreguesMes} icon="✅" color="green" subtitle={`Taxa: ${taxaEntrega}%`} />
-        <StatsCard title="Problemas" value={problemasMes} icon="⚠️" color="red" subtitle="Entregas com problema no mês" />
+        <StatsCard title="Pedidos" value={pedidosPeriodo} icon="📋" color="blue" subtitle={`${pedidosSemana} esta semana · ${pedidosHoje} hoje`} />
+        <StatsCard title="Faturamento" value={`R$ ${(faturamentoPeriodo._sum.valor ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon="💰" color="green" subtitle={`Semana: R$ ${(faturamentoSemana._sum.valor ?? 0).toFixed(2)}`} />
+        <StatsCard title="Entregas OK" value={entreguesPeriodo} icon="✅" color="green" subtitle={`Taxa: ${taxaEntrega}%`} />
+        <StatsCard title="Problemas" value={problemasPeriodo} icon="⚠️" color="red" subtitle="Entregas com problema neste período" />
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         {/* Pedidos por status */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-gray-900">Pedidos por Status (Mês)</h2></CardHeader>
+          <CardHeader><h2 className="font-semibold text-gray-900">Pedidos por Status</h2></CardHeader>
           <CardContent>
             {pedidosPorStatus.length === 0 ? (
               <p className="text-gray-600 text-sm">Nenhum dado</p>
             ) : (
               <div className="space-y-3">
                 {pedidosPorStatus.map(s => {
-                  const total = pedidosMes || 1
+                  const total = pedidosPeriodo || 1
                   const pct = ((s._count._all / total) * 100).toFixed(0)
                   const cores: Record<string, string> = {
                     NOVO: 'bg-blue-500',
@@ -125,7 +159,7 @@ export default async function RelatoriosPage() {
 
         {/* Performance entregadores */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-gray-900">Performance Entregadores (Mês)</h2></CardHeader>
+          <CardHeader><h2 className="font-semibold text-gray-900">Performance Entregadores</h2></CardHeader>
           <CardContent>
             {entregadoresPerf.length === 0 ? (
               <p className="text-gray-600 text-sm">Nenhum entregador cadastrado</p>
@@ -160,7 +194,7 @@ export default async function RelatoriosPage() {
       {/* Top clientes */}
       <Card>
         <CardHeader>
-          <h2 className="font-semibold text-gray-900">Top Clientes do Mês</h2>
+          <h2 className="font-semibold text-gray-900">Top Clientes</h2>
         </CardHeader>
         <CardContent className="p-0">
           {topClientes.filter(c => c.pedidos.length > 0).length === 0 ? (
@@ -193,6 +227,25 @@ export default async function RelatoriosPage() {
           )}
         </CardContent>
       </Card>
+    </>
+  )
+}
+
+export default async function RelatoriosPage({ searchParams }: { searchParams: Promise<{ periodo?: string }> }) {
+  const params = await searchParams
+  const periodo = (params.periodo || 'mensal') as Period
+
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Relatórios</h1>
+      </div>
+
+      <PeriodFilter />
+
+      <Suspense fallback={<div className="text-center py-8">Carregando dados...</div>}>
+        <RelatoriosContent periodo={periodo} />
+      </Suspense>
     </div>
   )
 }
