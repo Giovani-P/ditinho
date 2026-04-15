@@ -21,11 +21,13 @@ const menuPorPerfil: Record<string, { href: string; icon: string; label: string 
   ],
   FINANCEIRO: [
     { href: '/financeiro', icon: '💰', label: 'Pagamentos' },
+    { href: '/admin/clientes', icon: '👥', label: 'Clientes' },
   ],
   ADMIN: [
     { href: '/admin', icon: '📊', label: 'Dashboard Geral' },
     { href: '/vendedor', icon: '📋', label: 'Pedidos' },
     { href: '/logistica', icon: '🗺️', label: 'Logística' },
+    { href: '/financeiro', icon: '💰', label: 'Financeiro' },
     { href: '/admin/clientes', icon: '👥', label: 'Clientes' },
     { href: '/admin/relatorios', icon: '📈', label: 'Relatórios' },
     { href: '/admin/usuarios', icon: '⚙️', label: 'Usuários' },
