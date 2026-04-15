@@ -73,6 +73,7 @@ model Espeto {
   tipo         String   @default("MOTO")   // MOTO | CAMINHAO
   prioridade   String   @default("HOJE")   // HOJE | AMANHA
   status       String   @default("PENDENTE") // PENDENTE | EM_ROTA | ENTREGUE | PROBLEMA
+  itensRetirados String?  // JSON string com itens que cliente já retirou
   horarioEst   String?
   observacoes  String?
   createdAt    DateTime @default(now())
