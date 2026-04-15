@@ -1,5 +1,5 @@
 export type Perfil = 'VENDEDOR' | 'LOGISTICA' | 'FINANCEIRO' | 'ENTREGADOR' | 'ADMIN'
-export type StatusPagamento = 'PAGO' | 'NAO_PAGO' | 'PENDENTE'
+export type StatusPagamento = 'PAGO' | 'RECEBER_NA_ENTREGA'
 export type TipoPedido = 'ENTREGA' | 'RETIRADA'
 export type OrigemPedido = 'CISS_POWER' | 'MANUAL'
 export type StatusPedido = 'NOVO' | 'EM_SEPARACAO' | 'AGUARDANDO_ENTREGA' | 'EM_ROTA' | 'ENTREGUE' | 'CANCELADO'

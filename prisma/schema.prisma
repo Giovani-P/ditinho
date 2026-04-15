@@ -50,7 +50,7 @@ model Pedido {
   clienteId       String
   valor           Float
   itens           String   // JSON string
-  statusPagamento String   @default("NAO_PAGO") // PAGO | NAO_PAGO | PENDENTE
+  statusPagamento String   @default("RECEBER_NA_ENTREGA") // PAGO | RECEBER_NA_ENTREGA
   tipo            String   @default("ENTREGA")  // ENTREGA | RETIRADA
   origem          String   @default("MANUAL")   // CISS_POWER | MANUAL
   status          String   @default("NOVO")     // NOVO | EM_SEPARACAO | AGUARDANDO_ENTREGA | EM_ROTA | ENTREGUE | CANCELADO
