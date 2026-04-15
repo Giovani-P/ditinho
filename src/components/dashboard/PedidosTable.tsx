@@ -30,6 +30,7 @@ export function PedidosTable({ pedidos, onCriarEspeto }: PedidosTableProps) {
             <th className="text-left py-3 px-4 font-semibold text-gray-600">Endereço</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-600">Valor</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-600">Pagamento</th>
+            <th className="text-left py-3 px-4 font-semibold text-gray-600">Origem</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-600">Status</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-600">Ação</th>
           </tr>
@@ -57,6 +58,15 @@ export function PedidosTable({ pedidos, onCriarEspeto }: PedidosTableProps) {
                 R$ {pedido.valor.toFixed(2)}
               </td>
               <td className="py-3 px-4">{pagamentoBadge(pedido.statusPagamento)}</td>
+              <td className="py-3 px-4">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  pedido.origem === 'CISS_POWER'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {pedido.origem === 'CISS_POWER' ? '🔗 CISS' : '✏️ Manual'}
+                </span>
+              </td>
               <td className="py-3 px-4">{statusPedidoBadge(pedido.status)}</td>
               {pedido.status === 'NOVO' && (
                 <td className="py-3 px-4">

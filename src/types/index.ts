@@ -23,6 +23,7 @@ export interface PedidoComCliente {
   itens: string
   statusPagamento: string
   tipo: string
+  origem: string
   status: string
   createdAt: Date
   cliente: {

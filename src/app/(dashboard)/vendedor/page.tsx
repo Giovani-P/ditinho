@@ -19,7 +19,16 @@ export default async function VendedorPage() {
     prisma.pedido.count({ where: { status: 'ENTREGUE', createdAt: { gte: hoje } } }),
     prisma.pedido.findMany({
       where: { status: 'NOVO' },
-      include: {
+      select: {
+        id: true,
+        numeroCiss: true,
+        valor: true,
+        itens: true,
+        statusPagamento: true,
+        tipo: true,
+        origem: true,
+        status: true,
+        createdAt: true,
         cliente: { select: { id: true, nome: true, telefone: true, endereco: true, bairro: true } },
       },
       orderBy: { createdAt: 'desc' },
