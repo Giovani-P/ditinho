@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { statusEspetoBadge } from '@/components/ui/Badge'
 import { ConfirmarEntregaButton } from '@/components/entregador/ConfirmarEntregaButton'
+import { LogoutButton } from '@/components/entregador/LogoutButton'
 
 export default async function AppEntregadorPage() {
   const session = await auth()
@@ -32,15 +33,16 @@ export default async function AppEntregadorPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header mobile */}
       <div className="bg-green-600 text-white px-4 py-5 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-green-200 text-xs">Olá,</p>
             <p className="font-bold text-lg">{session.user.name}</p>
           </div>
-          <div className="text-right">
-            <p className="text-green-200 text-xs">Entregas hoje</p>
-            <p className="font-bold text-2xl">{espetos.length}</p>
-          </div>
+          <LogoutButton />
+        </div>
+        <div className="text-left">
+          <p className="text-green-200 text-xs">Entregas hoje</p>
+          <p className="font-bold text-2xl">{espetos.length}</p>
         </div>
       </div>
 
