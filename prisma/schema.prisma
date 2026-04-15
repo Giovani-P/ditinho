@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  perfil    String   // VENDEDOR | LOGISTICA | FINANCEIRO | ENTREGADOR | ADMIN
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entregador Entregador?
+  auditLogs  AuditLog[]
+
+  @@map("users")
+}
+
+model Cliente {
+  id          String   @id @default(cuid())
+  nome        String
+  telefone    String?
+  cpfCnpj     String?
+  endereco    String
+  numero      String?
+  bairro      String
+  cidade      String   @default("Serra Negra")
+  cep         String?
+  referencia  String?
+  observacoes String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pedidos Pedido[]
+  espetos Espeto[]
+
+  @@map("clientes")
+}
+
+model Pedido {
+  id              String   @id @default(cuid())
+  numeroCiss      String?
+  clienteId       String
+  valor           Float
+  itens           String   // JSON string
+  statusPagamento String   @default("NAO_PAGO") // PAGO | NAO_PAGO | PENDENTE
+  tipo            String   @default("ENTREGA")  // ENTREGA | RETIRADA
+  origem          String   @default("MANUAL")   // CISS_POWER | MANUAL
+  status          String   @default("NOVO")     // NOVO | EM_SEPARACAO | AGUARDANDO_ENTREGA | EM_ROTA | ENTREGUE | CANCELADO
+  observacoes     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  cliente Cliente  @relation(fields: [clienteId], references: [id])
+  espetos Espeto[]
+
+  @@map("pedidos")
+}
+
+model Espeto {
+  id           String   @id @default(cuid())
+  numero       Int?     @unique
+  pedidoId     String
+  clienteId    String
+  entregadorId String?
+  tipo         String   @default("MOTO")   // MOTO | CAMINHAO
+  prioridade   String   @default("HOJE")   // HOJE | AMANHA
+  status       String   @default("PENDENTE") // PENDENTE | EM_ROTA | ENTREGUE | PROBLEMA
+  horarioEst   String?
+  observacoes  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pedido     Pedido      @relation(fields: [pedidoId], references: [id])
+  cliente    Cliente     @relation(fields: [clienteId], references: [id])
+  entregador Entregador? @relation(fields: [entregadorId], references: [id])
+  entrega    Entrega?
+
+  @@map("espetos")
+}
+
+model Entrega {
+  id            String   @id @default(cuid())
+  espetoId      String   @unique
+  fotoUrl       String?
+  assinaturaUrl String?
+  dataEntrega   DateTime @default(now())
+  gpsLat        Float?
+  gpsLng        Float?
+  observacoes   String?
+  createdAt     DateTime @default(now())
+
+  espeto Espeto @relation(fields: [espetoId], references: [id])
+
+  @@map("entregas")
+}
+
+model Entregador {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  tipo       String   @default("MOTO") // MOTO | CAMINHAO
+  disponivel Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id])
+  espetos Espeto[]
+
+  @@map("entregadores")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String
+  acao          String
+  entidade      String
+  entidadeId    String
+  valorAnterior String?
+  valorNovo     String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
