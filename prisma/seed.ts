@@ -1,10 +1,17 @@
 import { PrismaClient } from '../src/generated/prisma/client'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+import * as fs from 'fs'
 import bcrypt from 'bcryptjs'
-import path from 'path'
 
-const dbPath = path.resolve(process.cwd(), 'dev.db')
-const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` })
+// Carrega .env.local (Next.js convention)
+const envLocal = path.resolve(process.cwd(), '.env.local')
+if (fs.existsSync(envLocal)) dotenv.config({ path: envLocal })
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
