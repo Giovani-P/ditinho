@@ -29,6 +29,7 @@ export function EspetoModal({ isOpen, onClose, espeto, entregadores }: EspetoMod
   const entregadoresPorTipo = entregadores.filter(e => e.tipo === espeto.tipo && e.disponivel)
 
   async function updateStatus(status: string) {
+    if (!espeto) return
     setLoading(true)
     try {
       const res = await fetch(`/api/espetos/${espeto.id}`, {
@@ -46,6 +47,7 @@ export function EspetoModal({ isOpen, onClose, espeto, entregadores }: EspetoMod
   }
 
   async function designarEntregador(entregadorId: string) {
+    if (!espeto) return
     setLoading(true)
     try {
       const res = await fetch(`/api/espetos/${espeto.id}`, {
@@ -85,6 +87,7 @@ export function EspetoModal({ isOpen, onClose, espeto, entregadores }: EspetoMod
               <span className="text-gray-600">Nome:</span>
               <span className="font-medium text-gray-900">{espeto.cliente.nome}</span>
             </div>
+            {espeto.cliente.telefone && (
             <div className="flex items-start justify-between">
               <span className="text-gray-600">Telefone:</span>
               <a
@@ -96,6 +99,7 @@ export function EspetoModal({ isOpen, onClose, espeto, entregadores }: EspetoMod
                 {espeto.cliente.telefone}
               </a>
             </div>
+            )}
             <div className="flex items-start justify-between">
               <span className="text-gray-600">Endereço:</span>
               <span className="text-right">

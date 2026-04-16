@@ -42,6 +42,8 @@ export interface EspetoCompleto {
   prioridade: string
   status: string
   horarioEst: string | null
+  itensRetirados: string | null
+  observacoes: string | null
   createdAt: Date
   cliente: {
     nome: string
