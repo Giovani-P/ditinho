@@ -5,6 +5,7 @@ import { StatsCard } from '@/components/dashboard/StatsCard'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
 import { statusEspetoBadge, pagamentoBadge } from '@/components/ui/Badge'
 import { WhatsAppStatus } from '@/components/admin/WhatsAppStatus'
+import { TourGuiado } from '@/components/tour/TourGuiado'
 
 export default async function AdminPage() {
   const session = await auth()
@@ -40,11 +41,14 @@ export default async function AdminPage() {
             {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
-        <WhatsAppStatus />
+        <div className="flex items-center gap-3">
+          <TourGuiado />
+          <WhatsAppStatus />
+        </div>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div id="tour-kpis" className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         <StatsCard title="Pedidos Hoje" value={pedidosHoje} icon="📋" color="blue" />
         <StatsCard title="Espetos Criados" value={espetosHoje} icon="📦" color="purple" />
         <StatsCard title="Em Rota" value={emRota} icon="🏍️" color="yellow" />
@@ -54,7 +58,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Últimas entregas */}
-      <Card>
+      <Card id="tour-espetos">
         <CardHeader>
           <h2 className="font-semibold text-gray-900">Espetos de Hoje</h2>
         </CardHeader>

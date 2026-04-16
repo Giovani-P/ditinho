@@ -9,7 +9,7 @@ interface SidebarProps {
   nome: string
 }
 
-const menuPorPerfil: Record<string, { href: string; icon: string; label: string }[]> = {
+const menuPorPerfil: Record<string, { href: string; icon: string; label: string; tourId?: string }[]> = {
   VENDEDOR: [
     { href: '/vendedor', icon: '📋', label: 'Fila de Pedidos' },
     { href: '/vendedor/novo-pedido', icon: '➕', label: 'Novo Pedido' },
@@ -25,12 +25,12 @@ const menuPorPerfil: Record<string, { href: string; icon: string; label: string 
   ],
   ADMIN: [
     { href: '/admin', icon: '📊', label: 'Dashboard Geral' },
-    { href: '/vendedor', icon: '📋', label: 'Pedidos' },
-    { href: '/logistica', icon: '🗺️', label: 'Logística' },
-    { href: '/financeiro', icon: '💰', label: 'Financeiro' },
-    { href: '/admin/clientes', icon: '👥', label: 'Clientes' },
-    { href: '/admin/relatorios', icon: '📈', label: 'Relatórios' },
-    { href: '/admin/usuarios', icon: '⚙️', label: 'Usuários' },
+    { href: '/vendedor', icon: '📋', label: 'Pedidos', tourId: 'tour-nav-pedidos' },
+    { href: '/logistica', icon: '🗺️', label: 'Logística', tourId: 'tour-nav-logistica' },
+    { href: '/financeiro', icon: '💰', label: 'Financeiro', tourId: 'tour-nav-financeiro' },
+    { href: '/admin/clientes', icon: '👥', label: 'Clientes', tourId: 'tour-nav-clientes' },
+    { href: '/admin/relatorios', icon: '📈', label: 'Relatórios', tourId: 'tour-nav-relatorios' },
+    { href: '/admin/usuarios', icon: '⚙️', label: 'Usuários', tourId: 'tour-nav-usuarios' },
   ],
 }
 
@@ -69,6 +69,7 @@ export function Sidebar({ perfil, nome }: SidebarProps) {
           return (
             <Link
               key={item.href}
+              id={item.tourId}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
