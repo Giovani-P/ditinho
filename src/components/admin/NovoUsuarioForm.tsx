@@ -108,7 +108,7 @@ export function NovoUsuarioForm() {
         <select
           value={perfil}
           onChange={e => setPerfil(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           {perfis.map(p => (
             <option key={p.value} value={p.value}>{p.label}</option>

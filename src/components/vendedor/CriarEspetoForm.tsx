@@ -152,7 +152,7 @@ export function CriarEspetoForm({ pedidoId, entregadores }: Props) {
                 className={`w-full text-left px-4 py-2.5 rounded-lg border text-sm transition-colors ${
                   entregadorId === e.id
                     ? 'border-green-500 bg-green-50 text-green-800'
-                    : 'border-gray-200 hover:bg-gray-50'
+                    : 'border-gray-200 text-gray-800 hover:bg-gray-50'
                 }`}
               >
                 {tipo === 'MOTO' ? '🏍️' : '🚚'} {e.nome}

@@ -73,7 +73,7 @@ export function EspetosTable({ espetos, onStatusChange }: EspetosTableProps) {
               {onStatusChange && espeto.status !== 'ENTREGUE' && (
                 <td className="py-3 px-4">
                   <select
-                    className="text-xs border border-gray-200 rounded px-2 py-1"
+                    className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-900 bg-white"
                     value={espeto.status}
                     onChange={(e) => onStatusChange(espeto.id, e.target.value)}
                   >

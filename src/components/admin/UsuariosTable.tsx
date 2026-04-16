@@ -111,14 +111,14 @@ export function UsuariosTable({ usuarios, currentUserId }: Props) {
                       placeholder="Email"
                       value={editForm.email}
                       onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                      className="w-full text-xs border border-gray-200 rounded px-2 py-1"
+                      className="w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-900"
                     />
                     <input
                       type="password"
                       placeholder="Nova senha"
                       value={editForm.novaSenha}
                       onChange={e => setEditForm({ ...editForm, novaSenha: e.target.value })}
-                      className="w-full text-xs border border-gray-200 rounded px-2 py-1"
+                      className="w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-900"
                     />
                     <div className="flex gap-1">
                       <button
