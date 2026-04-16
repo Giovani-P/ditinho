@@ -6,12 +6,15 @@ import { useRouter } from 'next/navigation'
 interface Props {
   espetoId: string
   statusAtual: string
+  isMotoPool?: boolean // espeto de moto ainda sem dono
 }
 
-export function ConfirmarEntregaButton({ espetoId, statusAtual }: Props) {
+export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
+  const [reportandoProblema, setReportandoProblema] = useState(false)
+  const [descricaoProblema, setDescricaoProblema] = useState('')
 
   if (statusAtual === 'ENTREGUE') {
     return (
@@ -21,6 +24,20 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual }: Props) {
         </div>
       </div>
     )
+  }
+
+  async function clamarEspeto() {
+    setLoading(true)
+    try {
+      await fetch(`/api/espetos/${espetoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimar: true, status: 'PENDENTE' }),
+      })
+      router.refresh()
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function iniciarRota() {
@@ -52,20 +69,53 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual }: Props) {
     }
   }
 
-  async function reportarProblema() {
+  async function confirmarProblema() {
+    if (!descricaoProblema.trim()) return
     setLoading(true)
     try {
       await fetch(`/api/espetos/${espetoId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PROBLEMA' }),
+        body: JSON.stringify({ status: 'PROBLEMA', descricaoProblema: descricaoProblema.trim() }),
       })
+      setReportandoProblema(false)
+      setDescricaoProblema('')
       router.refresh()
     } finally {
       setLoading(false)
     }
   }
 
+  // Modal de problema
+  if (reportandoProblema) {
+    return (
+      <div className="px-4 pb-4 space-y-3">
+        <p className="text-sm font-semibold text-red-600">⚠️ Reportar Problema</p>
+        <textarea
+          value={descricaoProblema}
+          onChange={e => setDescricaoProblema(e.target.value)}
+          placeholder="Descreva o problema (obrigatório)..."
+          rows={3}
+          className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
+        />
+        <button
+          onClick={confirmarProblema}
+          disabled={loading || !descricaoProblema.trim()}
+          className="w-full bg-red-600 text-white text-sm font-bold py-3 rounded-xl disabled:opacity-40"
+        >
+          {loading ? 'Enviando...' : '⚠️ Confirmar Problema'}
+        </button>
+        <button
+          onClick={() => { setReportandoProblema(false); setDescricaoProblema('') }}
+          className="w-full bg-gray-100 text-gray-600 text-sm py-2.5 rounded-xl"
+        >
+          Cancelar
+        </button>
+      </div>
+    )
+  }
+
+  // Confirmação de entrega
   if (confirmando) {
     return (
       <div className="px-4 pb-4 space-y-2">
@@ -82,6 +132,21 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual }: Props) {
           className="w-full bg-gray-100 text-gray-600 text-sm py-2.5 rounded-xl"
         >
           Cancelar
+        </button>
+      </div>
+    )
+  }
+
+  // Motoboy do pool — espeto ainda sem dono
+  if (isMotoPool) {
+    return (
+      <div className="px-4 pb-4">
+        <button
+          onClick={clamarEspeto}
+          disabled={loading}
+          className="w-full bg-orange-500 text-white text-sm font-semibold py-3 rounded-xl disabled:opacity-50"
+        >
+          {loading ? 'Aguarde...' : '🏍️ Pegar esta entrega'}
         </button>
       </div>
     )
@@ -107,8 +172,7 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual }: Props) {
             ✅ Confirmar Entrega
           </button>
           <button
-            onClick={reportarProblema}
-            disabled={loading}
+            onClick={() => setReportandoProblema(true)}
             className="w-full bg-red-50 border border-red-200 text-red-600 text-sm py-2.5 rounded-xl"
           >
             ⚠️ Reportar Problema

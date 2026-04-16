@@ -13,17 +13,33 @@ export async function PATCH(
 
   const { id } = await params
   const body = await req.json()
-  const { status, entregadorId } = body
+  const { status, entregadorId, descricaoProblema, horarioApos, horarioAte, itensRetirados, claimar } = body
 
-  const statusAnterior = status
-    ? (await prisma.espeto.findUnique({ where: { id }, select: { status: true } }))?.status
-    : null
+  const espetoAtual = await prisma.espeto.findUnique({
+    where: { id },
+    select: { status: true, tipo: true },
+  })
+  const statusAnterior = espetoAtual?.status ?? null
+
+  // Motoboy assume entrega do pool compartilhado
+  let entregadorIdResolvido = entregadorId
+  if (claimar) {
+    const entregador = await prisma.entregador.findFirst({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+    entregadorIdResolvido = entregador?.id ?? null
+  }
 
   const espeto = await prisma.espeto.update({
     where: { id },
     data: {
       ...(status ? { status } : {}),
-      ...(entregadorId !== undefined ? { entregadorId } : {}),
+      ...(entregadorIdResolvido !== undefined ? { entregadorId: entregadorIdResolvido } : {}),
+      ...(descricaoProblema !== undefined ? { descricaoProblema } : {}),
+      ...(horarioApos !== undefined ? { horarioApos } : {}),
+      ...(horarioAte !== undefined ? { horarioAte } : {}),
+      ...(itensRetirados !== undefined ? { itensRetirados } : {}),
     },
     include: {
       cliente: { select: { nome: true, telefone: true } },
@@ -33,12 +49,19 @@ export async function PATCH(
     },
   })
 
-  // Atualizar pedido quando entregue
+  // Ao entregar: atualizar pedido + registrar data/hora de entrega
   if (status === 'ENTREGUE') {
-    await prisma.pedido.update({
-      where: { id: espeto.pedidoId },
-      data: { status: 'ENTREGUE' },
-    })
+    await Promise.all([
+      prisma.pedido.update({
+        where: { id: espeto.pedidoId },
+        data: { status: 'ENTREGUE' },
+      }),
+      prisma.entrega.upsert({
+        where: { espetoId: id },
+        create: { espetoId: id, dataEntrega: new Date() },
+        update: { dataEntrega: new Date() },
+      }),
+    ])
   }
 
   invalidateCache('espetos:')
@@ -65,7 +88,7 @@ export async function PATCH(
         nomeCliente: espeto.cliente.nome,
         numeroPedido,
         nomeEntregador: espeto.entregador?.user.nome,
-        horarioEst: espeto.horarioEst,
+        horarioEst: espeto.horarioAte ?? espeto.horarioApos ?? null,
       }).catch(err => console.error('[WPP] Falha na notificação em rota:', err))
     }
   }

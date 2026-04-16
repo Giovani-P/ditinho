@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const body = await req.json()
-  const { pedidoId, tipo, prioridade, entregadorId, horarioEst } = body
+  const { pedidoId, tipo, prioridade, entregadorId, horarioApos, horarioAte, itensRetirados } = body
 
   const pedido = await prisma.pedido.findUnique({
     where: { id: pedidoId },
@@ -62,7 +62,9 @@ export async function POST(req: NextRequest) {
       tipo: tipo ?? 'MOTO',
       prioridade: prioridade ?? 'HOJE',
       entregadorId: entregadorId ?? null,
-      horarioEst: horarioEst ?? null,
+      horarioApos: horarioApos ?? null,
+      horarioAte: horarioAte ?? null,
+      itensRetirados: itensRetirados ?? null,
     },
   })
 

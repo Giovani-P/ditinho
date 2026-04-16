@@ -1,5 +1,5 @@
 export type Perfil = 'VENDEDOR' | 'LOGISTICA' | 'FINANCEIRO' | 'ENTREGADOR' | 'ADMIN'
-export type StatusPagamento = 'PAGO' | 'RECEBER_NA_ENTREGA'
+export type StatusPagamento = 'PAGO' | 'RECEBER_NA_ENTREGA' | 'A_PRAZO'
 export type TipoPedido = 'ENTREGA' | 'RETIRADA'
 export type OrigemPedido = 'CISS_POWER' | 'MANUAL'
 export type StatusPedido = 'NOVO' | 'EM_SEPARACAO' | 'AGUARDANDO_ENTREGA' | 'EM_ROTA' | 'ENTREGUE' | 'CANCELADO'
@@ -25,6 +25,7 @@ export interface PedidoComCliente {
   tipo: string
   origem: string
   status: string
+  dataAgendada: Date | null
   createdAt: Date
   cliente: {
     id: string
@@ -41,10 +42,16 @@ export interface EspetoCompleto {
   tipo: string
   prioridade: string
   status: string
-  horarioEst: string | null
+  horarioApos: string | null
+  horarioAte: string | null
+  descricaoProblema: string | null
   itensRetirados: string | null
   observacoes: string | null
   createdAt: Date
+  pedido: {
+    itens: string
+    statusPagamento: string
+  }
   cliente: {
     nome: string
     telefone: string | null
@@ -52,8 +59,12 @@ export interface EspetoCompleto {
     bairro: string
   }
   entregador: {
+    id: string
     tipo: string
     user: { nome: string }
+  } | null
+  entrega: {
+    dataEntrega: Date
   } | null
 }
 

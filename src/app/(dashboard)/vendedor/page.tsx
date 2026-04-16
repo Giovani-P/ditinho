@@ -61,12 +61,6 @@ export default async function VendedorPage() {
             </h2>
             <div className="flex items-center gap-3">
               <CissSyncButton />
-              <a
-                href="/vendedor/novo-pedido"
-                className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-              >
-                + Novo Pedido Manual
-              </a>
             </div>
           </div>
         </CardHeader>

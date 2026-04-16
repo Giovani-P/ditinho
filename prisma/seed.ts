@@ -288,7 +288,7 @@ async function main() {
       tipo: 'CAMINHAO',
       prioridade: 'HOJE',
       status: 'PENDENTE',
-      horarioEst: '10:00',
+      horarioApos: '09:00', horarioAte: '10:00',
     },
   })
 
@@ -301,7 +301,7 @@ async function main() {
       tipo: 'MOTO',
       prioridade: 'HOJE',
       status: 'PENDENTE',
-      horarioEst: '11:30',
+      horarioApos: '11:00', horarioAte: '12:00',
     },
   })
 
@@ -314,7 +314,7 @@ async function main() {
       tipo: 'MOTO',
       prioridade: 'HOJE',
       status: 'EM_ROTA',
-      horarioEst: '09:00',
+      horarioApos: '08:30', horarioAte: '09:30',
     },
   })
 
@@ -327,7 +327,7 @@ async function main() {
       tipo: 'MOTO',
       prioridade: 'HOJE',
       status: 'ENTREGUE',
-      horarioEst: '08:30',
+      horarioApos: '08:00', horarioAte: '09:00',
     },
   })
 

@@ -50,10 +50,11 @@ model Pedido {
   clienteId       String
   valor           Float
   itens           String   // JSON string
-  statusPagamento String   @default("RECEBER_NA_ENTREGA") // PAGO | RECEBER_NA_ENTREGA
-  tipo            String   @default("ENTREGA")  // ENTREGA | RETIRADA
-  origem          String   @default("MANUAL")   // CISS_POWER | MANUAL
-  status          String   @default("NOVO")     // NOVO | EM_SEPARACAO | AGUARDANDO_ENTREGA | EM_ROTA | ENTREGUE | CANCELADO
+  statusPagamento String    @default("RECEBER_NA_ENTREGA") // PAGO | RECEBER_NA_ENTREGA | A_PRAZO
+  tipo            String    @default("ENTREGA")  // ENTREGA | RETIRADA
+  origem          String    @default("MANUAL")   // CISS_POWER | MANUAL
+  status          String    @default("NOVO")     // NOVO | EM_SEPARACAO | AGUARDANDO_ENTREGA | EM_ROTA | ENTREGUE | CANCELADO
+  dataAgendada    DateTime? // data futura agendada pelo gerente para entrega
   observacoes     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -73,9 +74,11 @@ model Espeto {
   tipo         String   @default("MOTO")   // MOTO | CAMINHAO
   prioridade   String   @default("HOJE")   // HOJE | AMANHA
   status       String   @default("PENDENTE") // PENDENTE | EM_ROTA | ENTREGUE | PROBLEMA
-  itensRetirados String?  // JSON string com itens que cliente já retirou
-  horarioEst   String?
-  observacoes  String?
+  itensRetirados    String?  // JSON string com itens que cliente já retirou (array de índices)
+  horarioApos       String?  // "entregar após" (ex: "08:00")
+  horarioAte        String?  // "entregar até" (ex: "12:00")
+  descricaoProblema String?  // descrição obrigatória quando status=PROBLEMA
+  observacoes       String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

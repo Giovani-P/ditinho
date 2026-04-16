@@ -12,7 +12,6 @@ interface SidebarProps {
 const menuPorPerfil: Record<string, { href: string; icon: string; label: string; tourId?: string }[]> = {
   VENDEDOR: [
     { href: '/vendedor', icon: '📋', label: 'Fila de Pedidos' },
-    { href: '/vendedor/novo-pedido', icon: '➕', label: 'Novo Pedido' },
   ],
   LOGISTICA: [
     { href: '/logistica', icon: '🗺️', label: 'Dashboard' },

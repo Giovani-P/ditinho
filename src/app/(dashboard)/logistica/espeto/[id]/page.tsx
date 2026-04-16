@@ -106,8 +106,10 @@ export default async function EspetoDetailPage({
               <p className="text-gray-400 text-sm italic">Não designado</p>
             )}
 
-            {espeto.horarioEst && (
-              <p className="mt-2 text-sm text-gray-600">🕐 Estimado: {espeto.horarioEst}</p>
+            {(espeto.horarioApos || espeto.horarioAte) && (
+              <p className="mt-2 text-sm text-gray-600">
+                🕐 Janela: {espeto.horarioApos || '--:--'} – {espeto.horarioAte || '--:--'}
+              </p>
             )}
           </CardContent>
         </Card>

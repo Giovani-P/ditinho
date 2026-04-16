@@ -11,13 +11,32 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status') ?? 'NOVO'
+  const aba = searchParams.get('aba') // 'dia' | 'agendados'
 
-  const cacheKey = `pedidos:${status}`
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
+  const amanha = new Date(hoje)
+  amanha.setDate(amanha.getDate() + 1)
+
+  const cacheKey = `pedidos:${status}:${aba ?? 'all'}`
   const cached = getCache(cacheKey)
   if (cached) return NextResponse.json(cached)
 
+  // Filtro de agendamento
+  let agendamentoWhere = {}
+  if (aba === 'agendados') {
+    agendamentoWhere = { dataAgendada: { gte: amanha } }
+  } else if (aba === 'dia') {
+    agendamentoWhere = {
+      OR: [
+        { dataAgendada: null, createdAt: { gte: hoje } },
+        { dataAgendada: { lt: amanha } },
+      ],
+    }
+  }
+
   const pedidos = await prisma.pedido.findMany({
-    where: { status },
+    where: { status, ...agendamentoWhere },
     include: {
       cliente: {
         select: { id: true, nome: true, telefone: true, endereco: true, bairro: true },
@@ -36,7 +55,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const body = await req.json()
-  const { clienteId, valor, itens, statusPagamento, tipo, origem, observacoes } = body
+  const { clienteId, valor, itens, statusPagamento, tipo, origem, observacoes, dataAgendada } = body
 
   // itens pode vir como array ou string JSON — normalizar para string
   const itensStr = typeof itens === 'string' ? itens : JSON.stringify(itens ?? [])
@@ -46,9 +65,10 @@ export async function POST(req: NextRequest) {
       clienteId,
       valor: parseFloat(valor),
       itens: itensStr,
-      statusPagamento: statusPagamento ?? 'NAO_PAGO',
+      statusPagamento: statusPagamento ?? 'RECEBER_NA_ENTREGA',
       tipo: tipo ?? 'ENTREGA',
       origem: origem ?? 'MANUAL',
+      dataAgendada: dataAgendada ? new Date(dataAgendada) : null,
       observacoes: observacoes ?? null,
     },
     include: {
