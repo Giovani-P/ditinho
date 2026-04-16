@@ -35,9 +35,16 @@ export default async function PedidoDecisaoPage({
   if (!pedido) notFound()
 
   const espetoExistente = pedido.espetos[0]
-  let itens: { descricao: string; quantidade: number; valorUnit: number }[] = []
+  type ItemPedido = { descricao: string; quantidade: number; valorUnit: number }
+  let itens: ItemPedido[] = []
   try {
-    itens = JSON.parse(pedido.itens)
+    const raw = JSON.parse(pedido.itens)
+    // Normaliza tanto { descricao, quantidade, valorUnit } quanto { produto, qtd, valor }
+    itens = raw.map((i: Record<string, unknown>) => ({
+      descricao: (i.descricao ?? i.produto ?? 'Produto') as string,
+      quantidade: Number(i.quantidade ?? i.qtd ?? 1),
+      valorUnit: Number(i.valorUnit ?? i.valor ?? 0),
+    }))
   } catch { itens = [] }
 
   return (

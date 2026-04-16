@@ -47,6 +47,8 @@ export function pagamentoBadge(status: string) {
   const map: Record<string, { variant: BadgeProps['variant']; label: string }> = {
     PAGO: { variant: 'success', label: '✓ Pago' },
     RECEBER_NA_ENTREGA: { variant: 'warning', label: '💰 Receber' },
+    NAO_PAGO: { variant: 'danger', label: '✗ Não Pago' },
+    PENDENTE: { variant: 'warning', label: '⏳ Pendente' },
   }
   const config = map[status] ?? { variant: 'default', label: status }
   return <Badge variant={config.variant}>{config.label}</Badge>
