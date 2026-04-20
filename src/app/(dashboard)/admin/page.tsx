@@ -40,7 +40,6 @@ export default async function AdminPage({ searchParams }: Props) {
           entregador: { include: { user: { select: { nome: true } } } },
         },
       }),
-      // Pedidos do dia: criados hoje OU agendados para hoje
       prisma.pedido.findMany({
         where: {
           OR: [
@@ -53,7 +52,6 @@ export default async function AdminPage({ searchParams }: Props) {
         orderBy: { createdAt: 'desc' },
         take: 30,
       }),
-      // Pedidos agendados para datas futuras
       prisma.pedido.findMany({
         where: {
           dataAgendada: { gte: amanha },
@@ -84,12 +82,12 @@ export default async function AdminPage({ searchParams }: Props) {
 
       {/* KPIs */}
       <div id="tour-kpis" className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-        <StatsCard title="Pedidos Hoje" value={pedidosHoje} icon="📋" color="blue" />
-        <StatsCard title="Espetos Criados" value={espetosHoje} icon="📦" color="purple" />
-        <StatsCard title="Em Rota" value={emRota} icon="🏍️" color="yellow" />
-        <StatsCard title="Entregues" value={entregues} icon="✅" color="green" />
-        <StatsCard title="Pendentes" value={pendentes} icon="⏳" color="gray" />
-        <StatsCard title="Problemas" value={problemas} icon="⚠️" color="red" />
+        <StatsCard title="Pedidos Hoje" value={pedidosHoje} icon="📋" color="blue" href="/vendedor" />
+        <StatsCard title="Espetos Criados" value={espetosHoje} icon="📦" color="purple" href="/logistica" />
+        <StatsCard title="Em Rota" value={emRota} icon="🏍️" color="yellow" href="/logistica?status=EM_ROTA" />
+        <StatsCard title="Entregues" value={entregues} icon="✅" color="green" href="/logistica?status=ENTREGUE" />
+        <StatsCard title="Pendentes" value={pendentes} icon="⏳" color="gray" href="/logistica?status=PENDENTE" />
+        <StatsCard title="Problemas" value={problemas} icon="⚠️" color="red" href="/logistica?status=PROBLEMA" />
       </div>
 
       {/* Últimas entregas */}

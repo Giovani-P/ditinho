@@ -47,9 +47,9 @@ export default async function VendedorPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <StatsCard title="Novos" value={novos} icon="🔔" color="blue" subtitle="Aguardando ação" />
-        <StatsCard title="Em Processamento" value={processados} icon="⚙️" color="yellow" subtitle="Hoje" />
-        <StatsCard title="Entregues" value={entregues} icon="✅" color="green" subtitle="Hoje" />
+        <StatsCard title="Novos" value={novos} icon="🔔" color="blue" subtitle="Aguardando ação" href="/vendedor/novo-pedido" />
+        <StatsCard title="Em Processamento" value={processados} icon="⚙️" color="yellow" subtitle="Hoje" href="/logistica" />
+        <StatsCard title="Entregues" value={entregues} icon="✅" color="green" subtitle="Hoje" href="/logistica?status=ENTREGUE" />
       </div>
 
       {/* Tabela */}
