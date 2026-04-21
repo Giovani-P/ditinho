@@ -4,31 +4,13 @@ import { useState, ReactNode } from 'react'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
 import { StatsCard } from '@/components/dashboard/StatsCard'
 import { PedidosTable } from '@/components/dashboard/PedidosTable'
-
-interface Pedido {
-  id: string
-  numeroCiss: string
-  valor: number
-  itens: unknown
-  statusPagamento: string
-  tipo: string
-  origem: string
-  status: string
-  createdAt: Date
-  cliente: {
-    id: string
-    nome: string
-    telefone: string
-    endereco: string
-    bairro: string
-  }
-}
+import type { PedidoComCliente } from '@/types'
 
 interface Props {
   novos: number
   processados: number
   entregues: number
-  pedidos: Pedido[]
+  pedidos: PedidoComCliente[]
   cissSync: ReactNode
 }
 
