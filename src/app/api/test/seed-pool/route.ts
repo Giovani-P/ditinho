@@ -7,8 +7,12 @@ import { auth } from '@/auth'
 
 export async function POST() {
   try {
+    console.log('[SEED-POOL] Iniciando...')
+
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+
+    console.log('[SEED-POOL] Usuário:', session.user.email)
 
     // Garantir que o usuário tem um Entregador record
     let entregador = await prisma.entregador.findFirst({
@@ -16,6 +20,7 @@ export async function POST() {
     })
 
     if (!entregador) {
+      console.log('[SEED-POOL] Criando entregador...')
       entregador = await prisma.entregador.create({
         data: {
           userId: session.user.id,
@@ -25,8 +30,16 @@ export async function POST() {
       })
     }
 
-    const hoje = new Date()
-    hoje.setHours(0, 0, 0, 0)
+    console.log('[SEED-POOL] Entregador OK:', entregador.id)
+
+    // Usar data garantidamente de "hoje" em UTC
+    const agora = new Date()
+    const ano = agora.getUTCFullYear()
+    const mes = String(agora.getUTCMonth() + 1).padStart(2, '0')
+    const dia = String(agora.getUTCDate()).padStart(2, '0')
+    const hoje = new Date(`${ano}-${mes}-${dia}T00:00:00Z`)
+
+    console.log('[SEED-POOL] Data de criação:', hoje.toISOString())
 
     // Encontrar ou criar clientes de teste
     let cliente1 = await prisma.cliente.findFirst({
@@ -227,9 +240,19 @@ export async function POST() {
     invalidateCache('espetos:')
     invalidateCache('dashboard:')
 
+    console.log('[SEED-POOL] ✅ 5 espetos criados com sucesso')
+
     return NextResponse.json({
       message: '✅ Pool de teste criado com sucesso!',
-      espetos: [espeto1, espeto2, espeto3, espeto4, espeto5],
+      espetosCriados: 5,
+      dataCreatedAt: hoje.toISOString(),
+      espetos: [
+        { id: espeto1.id, numero: espeto1.numero },
+        { id: espeto2.id, numero: espeto2.numero },
+        { id: espeto3.id, numero: espeto3.numero },
+        { id: espeto4.id, numero: espeto4.numero },
+        { id: espeto5.id, numero: espeto5.numero },
+      ],
     })
   } catch (error) {
     console.error('[SEED POOL ERROR]', error)
