@@ -16,8 +16,12 @@ export default async function AppMotoPage() {
 
   if (entregador?.tipo === 'CAMINHAO') redirect('/app-caminhao')
 
-  const hoje = new Date()
-  hoje.setHours(0, 0, 0, 0)
+  // Calcular "hoje" em UTC (mesma forma que o seed-pool endpoint)
+  const agora = new Date()
+  const ano = agora.getUTCFullYear()
+  const mes = String(agora.getUTCMonth() + 1).padStart(2, '0')
+  const dia = String(agora.getUTCDate()).padStart(2, '0')
+  const hoje = new Date(`${ano}-${mes}-${dia}T00:00:00Z`)
 
   const [minhasEntregas, pool] = await Promise.all([
     // Entregas já claimadas por mim (em andamento)
