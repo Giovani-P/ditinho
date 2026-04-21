@@ -1,12 +1,80 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
   espetoId: string
   statusAtual: string
-  isMotoPool?: boolean // espeto de moto ainda sem dono
+  isMotoPool?: boolean
+}
+
+function GravadorAudio({ onAudio }: { onAudio: (base64: string | null) => void }) {
+  const [gravando, setGravando] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const mediaRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
+
+  async function iniciarGravacao() {
+    chunksRef.current = []
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const recorder = new MediaRecorder(stream)
+    mediaRef.current = recorder
+
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+    recorder.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+      const url = URL.createObjectURL(blob)
+      setAudioUrl(url)
+      stream.getTracks().forEach(t => t.stop())
+
+      const reader = new FileReader()
+      reader.onloadend = () => onAudio(reader.result as string)
+      reader.readAsDataURL(blob)
+    }
+
+    recorder.start()
+    setGravando(true)
+  }
+
+  function pararGravacao() {
+    mediaRef.current?.stop()
+    setGravando(false)
+  }
+
+  function descartar() {
+    setAudioUrl(null)
+    onAudio(null)
+  }
+
+  if (audioUrl) {
+    return (
+      <div className="space-y-2">
+        <audio src={audioUrl} controls className="w-full h-10" />
+        <button
+          type="button"
+          onClick={descartar}
+          className="text-xs text-red-500 underline"
+        >
+          Descartar áudio
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={gravando ? pararGravacao : iniciarGravacao}
+      className={`w-full text-sm font-medium py-2.5 rounded-xl border transition-colors ${
+        gravando
+          ? 'bg-red-500 text-white border-red-500 animate-pulse'
+          : 'bg-gray-50 border-gray-200 text-gray-600'
+      }`}
+    >
+      {gravando ? '⏹ Parar gravação' : '🎙️ Gravar áudio (opcional)'}
+    </button>
+  )
 }
 
 export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Props) {
@@ -15,6 +83,7 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
   const [confirmando, setConfirmando] = useState(false)
   const [reportandoProblema, setReportandoProblema] = useState(false)
   const [descricaoProblema, setDescricaoProblema] = useState('')
+  const [audioProblema, setAudioProblema] = useState<string | null>(null)
 
   if (statusAtual === 'ENTREGUE') {
     return (
@@ -76,10 +145,15 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
       await fetch(`/api/espetos/${espetoId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PROBLEMA', descricaoProblema: descricaoProblema.trim() }),
+        body: JSON.stringify({
+          status: 'PROBLEMA',
+          descricaoProblema: descricaoProblema.trim(),
+          ...(audioProblema ? { audioProblema } : {}),
+        }),
       })
       setReportandoProblema(false)
       setDescricaoProblema('')
+      setAudioProblema(null)
       router.refresh()
     } finally {
       setLoading(false)
@@ -98,6 +172,10 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
           rows={3}
           className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
         />
+        <GravadorAudio onAudio={setAudioProblema} />
+        {audioProblema && (
+          <p className="text-xs text-green-600 font-medium">✅ Áudio gravado</p>
+        )}
         <button
           onClick={confirmarProblema}
           disabled={loading || !descricaoProblema.trim()}
@@ -106,7 +184,7 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
           {loading ? 'Enviando...' : '⚠️ Confirmar Problema'}
         </button>
         <button
-          onClick={() => { setReportandoProblema(false); setDescricaoProblema('') }}
+          onClick={() => { setReportandoProblema(false); setDescricaoProblema(''); setAudioProblema(null) }}
           className="w-full bg-gray-100 text-gray-600 text-sm py-2.5 rounded-xl"
         >
           Cancelar

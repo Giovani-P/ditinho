@@ -78,6 +78,7 @@ model Espeto {
   horarioApos       String?  // "entregar após" (ex: "08:00")
   horarioAte        String?  // "entregar até" (ex: "12:00")
   descricaoProblema String?  // descrição obrigatória quando status=PROBLEMA
+  audioProblema     String?  // áudio em base64 (opcional, gravado no app do entregador)
   observacoes       String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

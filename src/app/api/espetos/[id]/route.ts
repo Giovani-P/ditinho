@@ -13,7 +13,7 @@ export async function PATCH(
 
   const { id } = await params
   const body = await req.json()
-  const { status, entregadorId, descricaoProblema, horarioApos, horarioAte, itensRetirados, claimar } = body
+  const { status, entregadorId, descricaoProblema, audioProblema, horarioApos, horarioAte, itensRetirados, claimar } = body
 
   const espetoAtual = await prisma.espeto.findUnique({
     where: { id },
@@ -64,6 +64,7 @@ export async function PATCH(
       ...(status ? { status } : {}),
       ...(entregadorIdResolvido !== undefined ? { entregadorId: entregadorIdResolvido } : {}),
       ...(descricaoProblema !== undefined ? { descricaoProblema } : {}),
+      ...(audioProblema !== undefined ? { audioProblema } : {}),
       ...(horarioApos !== undefined ? { horarioApos } : {}),
       ...(horarioAte !== undefined ? { horarioAte } : {}),
       ...(itensRetirados !== undefined ? { itensRetirados } : {}),
