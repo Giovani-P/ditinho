@@ -10,9 +10,10 @@ export async function POST() {
     console.log('[SEED-POOL] Iniciando...')
 
     const session = await auth()
+    console.log('[SEED-POOL] Session:', JSON.stringify(session, null, 2))
     if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    console.log('[SEED-POOL] Usuário:', session.user.email)
+    console.log('[SEED-POOL] Usuário:', session.user?.email || 'SEM EMAIL')
 
     // Garantir que o usuário tem um Entregador record
     let entregador = await prisma.entregador.findFirst({
