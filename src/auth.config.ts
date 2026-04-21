@@ -9,7 +9,7 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
-      const protectedPaths = ['/vendedor', '/logistica', '/admin', '/app-entregador', '/financeiro']
+      const protectedPaths = ['/vendedor', '/logistica', '/admin', '/app-entregador', '/app-moto', '/app-caminhao', '/financeiro']
       const isProtected = protectedPaths.some(p => nextUrl.pathname.startsWith(p))
 
       if (isProtected) return isLoggedIn

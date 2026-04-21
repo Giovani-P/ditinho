@@ -21,14 +21,41 @@ export async function PATCH(
   })
   const statusAnterior = espetoAtual?.status ?? null
 
-  // Motoboy assume entrega do pool compartilhado
+  // Motoboy assume entrega do pool — usa transação serializable para evitar double-claim
   let entregadorIdResolvido = entregadorId
   if (claimar) {
     const entregador = await prisma.entregador.findFirst({
       where: { userId: session.user.id },
       select: { id: true },
     })
-    entregadorIdResolvido = entregador?.id ?? null
+
+    try {
+      const claimado = await prisma.$transaction(async (tx) => {
+        const livre = await tx.espeto.findFirst({
+          where: { id, entregadorId: null },
+        })
+        if (!livre) throw new Error('ALREADY_CLAIMED')
+        return tx.espeto.update({
+          where: { id },
+          data: { entregadorId: entregador?.id ?? null },
+          include: {
+            cliente: { select: { nome: true, telefone: true } },
+            pedido: { select: { valor: true, numeroCiss: true } },
+            entregador: { include: { user: { select: { nome: true } } } },
+            entrega: { select: { fotoUrl: true } },
+          },
+        })
+      }, { isolationLevel: 'Serializable' })
+
+      invalidateCache('espetos:')
+      return NextResponse.json(claimado)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : ''
+      if (msg === 'ALREADY_CLAIMED' || (err as { code?: string }).code === 'P2034') {
+        return NextResponse.json({ error: 'ALREADY_CLAIMED', message: 'Esta entrega já foi pega por outro motoboy' }, { status: 409 })
+      }
+      throw err
+    }
   }
 
   const espeto = await prisma.espeto.update({

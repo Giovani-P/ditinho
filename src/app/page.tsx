@@ -12,7 +12,7 @@ export default async function Home() {
 
   if (perfil === 'VENDEDOR') redirect('/vendedor')
   if (perfil === 'LOGISTICA') redirect('/logistica')
-  if (perfil === 'ENTREGADOR') redirect('/app-entregador')
+  if (perfil === 'ENTREGADOR') redirect('/app-moto')
   if (perfil === 'FINANCEIRO') redirect('/financeiro')
 
   redirect('/admin')
