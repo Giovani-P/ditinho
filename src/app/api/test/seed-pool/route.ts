@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { invalidateCache } from '@/lib/cache'
 
 // ⚠️ APENAS PARA TESTE — Remove antes de produção
 
@@ -203,6 +204,9 @@ export async function POST() {
         createdAt: hoje,
       },
     })
+
+    invalidateCache('espetos:')
+    invalidateCache('dashboard:')
 
     return NextResponse.json({
       message: '✅ Pool de teste criado com sucesso!',
