@@ -5,6 +5,8 @@ interface StatsCardProps {
   color: 'blue' | 'yellow' | 'green' | 'red' | 'purple' | 'gray'
   subtitle?: string
   href?: string
+  onClick?: () => void
+  isActive?: boolean
 }
 
 const colorClasses = {
@@ -16,8 +18,9 @@ const colorClasses = {
   gray: 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 hover:shadow-md',
 }
 
-export function StatsCard({ title, value, icon, color, subtitle, href }: StatsCardProps) {
-  const baseClasses = `border rounded-xl p-6 transition-all flex items-start justify-between ${colorClasses[color]}`
+export function StatsCard({ title, value, icon, color, subtitle, href, onClick, isActive }: StatsCardProps) {
+  const activeClass = isActive ? 'ring-2 ring-offset-2 ring-current shadow-lg' : ''
+  const baseClasses = `border rounded-xl p-6 transition-all flex items-start justify-between ${colorClasses[color]} ${activeClass}`
 
   const content = (
     <>
@@ -29,6 +32,17 @@ export function StatsCard({ title, value, icon, color, subtitle, href }: StatsCa
       <div className="text-4xl">{icon}</div>
     </>
   )
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className={`${baseClasses} cursor-pointer block text-left w-full border-0 font-inherit`}
+      >
+        {content}
+      </button>
+    )
+  }
 
   if (href) {
     return (

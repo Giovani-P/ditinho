@@ -2,8 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
-import { StatsCard } from '@/components/dashboard/StatsCard'
-import { PedidosTable } from '@/components/dashboard/PedidosTable'
+import { VendedorClient } from '@/components/vendedor/VendedorClient'
 import { CissSyncButton } from '@/components/vendedor/CissSyncButton'
 
 export default async function VendedorPage() {
@@ -13,12 +12,11 @@ export default async function VendedorPage() {
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
-  const [novos, processados, entregues, pedidos] = await Promise.all([
+  const [novos, processados, entregues, todosOsPedidos] = await Promise.all([
     prisma.pedido.count({ where: { status: 'NOVO' } }),
     prisma.pedido.count({ where: { status: { in: ['AGUARDANDO_ENTREGA', 'EM_SEPARACAO'] }, createdAt: { gte: hoje } } }),
     prisma.pedido.count({ where: { status: 'ENTREGUE', createdAt: { gte: hoje } } }),
     prisma.pedido.findMany({
-      where: { status: 'NOVO' },
       select: {
         id: true,
         numeroCiss: true,
@@ -32,7 +30,7 @@ export default async function VendedorPage() {
         cliente: { select: { id: true, nome: true, telefone: true, endereco: true, bairro: true } },
       },
       orderBy: { createdAt: 'desc' },
-      take: 30,
+      take: 100,
     }),
   ])
 
@@ -45,29 +43,13 @@ export default async function VendedorPage() {
         </p>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <StatsCard title="Novos" value={novos} icon="🔔" color="blue" subtitle="Aguardando ação" href="/vendedor/novo-pedido" />
-        <StatsCard title="Em Processamento" value={processados} icon="⚙️" color="yellow" subtitle="Hoje" href="/logistica" />
-        <StatsCard title="Entregues" value={entregues} icon="✅" color="green" subtitle="Hoje" href="/logistica?status=ENTREGUE" />
-      </div>
-
-      {/* Tabela */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">
-              Novos Pedidos ({novos})
-            </h2>
-            <div className="flex items-center gap-3">
-              <CissSyncButton />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <PedidosTable pedidos={pedidos as never} />
-        </CardContent>
-      </Card>
+      <VendedorClient
+        novos={novos}
+        processados={processados}
+        entregues={entregues}
+        pedidos={todosOsPedidos as never}
+        cissSync={<CissSyncButton />}
+      />
     </div>
   )
 }
