@@ -1,11 +1,30 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { invalidateCache } from '@/lib/cache'
+import { auth } from '@/auth'
 
 // ⚠️ APENAS PARA TESTE — Remove antes de produção
 
 export async function POST() {
   try {
+    const session = await auth()
+    if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+
+    // Garantir que o usuário tem um Entregador record
+    let entregador = await prisma.entregador.findFirst({
+      where: { userId: session.user.id },
+    })
+
+    if (!entregador) {
+      entregador = await prisma.entregador.create({
+        data: {
+          userId: session.user.id,
+          tipo: 'MOTO',
+          disponivel: true,
+        },
+      })
+    }
+
     const hoje = new Date()
     hoje.setHours(0, 0, 0, 0)
 
