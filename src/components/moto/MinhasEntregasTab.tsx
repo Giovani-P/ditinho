@@ -1,7 +1,10 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ConfirmarEntregaButton } from '@/components/entregador/ConfirmarEntregaButton'
 import { statusEspetoBadge } from '@/components/ui/Badge'
+import { TransferirEntregaModal } from './TransferirEntregaModal'
 
 interface EspetoMinha {
   id: string
@@ -23,8 +26,34 @@ function pagamentoBadge(s: string) {
 }
 
 export function MinhasEntregasTab({ minhasEntregas }: Props) {
-  const entregasHoje = minhasEntregas.filter(e => e.prioridade === 'HOJE')
-  const entregasAmanha = minhasEntregas.filter(e => e.prioridade === 'AMANHA')
+  const router = useRouter()
+  const [espetoTransferencia, setEspetoTransferencia] = useState<EspetoMinha | null>(null)
+  const [entregasAtualizadas, setEntregasAtualizadas] = useState(minhasEntregas)
+
+  const entregasHoje = entregasAtualizadas.filter(e => e.prioridade === 'HOJE')
+  const entregasAmanha = entregasAtualizadas.filter(e => e.prioridade === 'AMANHA')
+
+  const handleTransferirConfirm = async (motoId: string) => {
+    if (!espetoTransferencia) return
+
+    try {
+      const res = await fetch(`/api/espetos/${espetoTransferencia.id}/transferir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ novoEntregadorId: motoId }),
+      })
+
+      if (!res.ok) throw new Error('Erro ao transferir')
+
+      // Remover da lista local
+      setEntregasAtualizadas(prev => prev.filter(e => e.id !== espetoTransferencia.id))
+      setEspetoTransferencia(null)
+      router.refresh()
+    } catch (error) {
+      console.error('Erro ao transferir:', error)
+      throw error
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -69,7 +98,15 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
                         className="flex-1 bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium py-2.5 rounded-xl text-center"
                       >🗺️ GPS</a>
                     </div>
-                    <ConfirmarEntregaButton espetoId={e.id} statusAtual={e.status} isMotoPool={false} />
+                    <div className="px-4 pb-2">
+                      <ConfirmarEntregaButton espetoId={e.id} statusAtual={e.status} isMotoPool={false} />
+                      <button
+                        onClick={() => setEspetoTransferencia(e)}
+                        className="w-full mt-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium py-2 rounded-lg transition-colors"
+                      >
+                        🔄 Transferir Entrega
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -106,7 +143,15 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
                         className="flex-1 bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium py-2.5 rounded-xl text-center"
                       >🗺️ GPS</a>
                     </div>
-                    <ConfirmarEntregaButton espetoId={e.id} statusAtual={e.status} isMotoPool={false} />
+                    <div className="px-4 pb-2">
+                      <ConfirmarEntregaButton espetoId={e.id} statusAtual={e.status} isMotoPool={false} />
+                      <button
+                        onClick={() => setEspetoTransferencia(e)}
+                        className="w-full mt-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium py-2 rounded-lg transition-colors"
+                      >
+                        🔄 Transferir Entrega
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -114,6 +159,12 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
           )}
         </>
       )}
+
+      <TransferirEntregaModal
+        isOpen={!!espetoTransferencia}
+        onClose={() => setEspetoTransferencia(null)}
+        onConfirm={handleTransferirConfirm}
+      />
     </div>
   )
 }
