@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { statusEspetoBadge } from '@/components/ui/Badge'
+import { PegarEntregaModal } from './PegarEntregaModal'
 
 interface EspetoPool {
   id: string
@@ -22,13 +23,12 @@ function pagamentoBadge(s: string) {
 
 export function EspetoPoolCard({ espeto, onClaimed }: { espeto: EspetoPool; onClaimed: () => void }) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [modalAberto, setModalAberto] = useState(false)
 
   const jaFoiPego = !!espeto.entregador
 
-  async function pegar() {
-    setLoading(true)
+  async function confirmarPegar() {
     setErro('')
     try {
       const res = await fetch(`/api/espetos/${espeto.id}`, {
@@ -38,16 +38,19 @@ export function EspetoPoolCard({ espeto, onClaimed }: { espeto: EspetoPool; onCl
       })
       if (res.status === 409) {
         setErro('Já pego! Atualizando...')
-        setTimeout(onClaimed, 1200)
+        setTimeout(() => {
+          onClaimed()
+          setModalAberto(false)
+        }, 1200)
         return
       }
       if (!res.ok) throw new Error()
       onClaimed()
+      setModalAberto(false)
       router.refresh()
     } catch {
       setErro('Erro ao pegar entrega')
-    } finally {
-      setLoading(false)
+      throw new Error(erro)
     }
   }
 
@@ -91,14 +94,20 @@ export function EspetoPoolCard({ espeto, onClaimed }: { espeto: EspetoPool; onCl
             >🗺️ GPS</a>
           </div>
           <button
-            onClick={pegar}
-            disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white text-sm font-bold py-3 rounded-xl transition-colors"
+            onClick={() => setModalAberto(true)}
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-3 rounded-xl transition-colors"
           >
-            {loading ? 'Pegando...' : '🏍️ Pegar esta entrega'}
+            🏍️ Pegar esta entrega
           </button>
         </div>
       )}
+
+      <PegarEntregaModal
+        isOpen={modalAberto}
+        espeto={espeto}
+        onConfirm={confirmarPegar}
+        onCancel={() => setModalAberto(false)}
+      />
     </div>
   )
 }

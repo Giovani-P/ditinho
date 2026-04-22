@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { LogoutButton } from '@/components/entregador/LogoutButton'
-import { PoolSeparacaoClient } from '@/components/moto/PoolSeparacaoClient'
+import { AppMotoTabs } from '@/components/moto/AppMotoTabs'
 import { ReactQueryProvider } from '@/components/moto/ReactQueryProvider'
 
 export default async function AppMotoPage() {
@@ -82,7 +82,7 @@ export default async function AppMotoPage() {
       </div>
 
       <ReactQueryProvider>
-        <PoolSeparacaoClient
+        <AppMotoTabs
           minhasEntregas={minhasEntregas as never}
           poolInicial={pool as never}
           entregadorId={entregador?.id ?? ''}
