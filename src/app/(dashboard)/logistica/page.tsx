@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
 import { EspetosTableClient } from '@/components/logistica/EspetosTableClient'
+import { SeedTestButton } from '@/components/logistica/SeedTestButton'
 import Link from 'next/link'
 
 interface Props {
@@ -64,10 +65,13 @@ export default async function LogisticaPage({ searchParams }: Props) {
             Entregas de hoje — {new Date().toLocaleDateString('pt-BR')}
           </p>
         </div>
-        <div className="text-sm text-gray-500">
-          🏍️ {entregadores.filter(e => e.tipo === 'MOTO' && e.disponivel).length} motos disponíveis
-          &nbsp;&nbsp;
-          🚚 {entregadores.filter(e => e.tipo === 'CAMINHAO' && e.disponivel).length} caminhões disponíveis
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-gray-500">
+            🏍️ {entregadores.filter(e => e.tipo === 'MOTO' && e.disponivel).length} motos disponíveis
+            &nbsp;&nbsp;
+            🚚 {entregadores.filter(e => e.tipo === 'CAMINHAO' && e.disponivel).length} caminhões disponíveis
+          </div>
+          <SeedTestButton />
         </div>
       </div>
 
