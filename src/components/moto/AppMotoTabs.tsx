@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PoolTab } from './PoolTab'
 import { MinhasEntregasTab } from './MinhasEntregasTab'
 
@@ -31,13 +31,29 @@ interface Props {
 
 export function AppMotoTabs({ minhasEntregas, poolInicial, entregadorId }: Props) {
   const [aba, setAba] = useState<'pool' | 'minhas'>('pool')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    const abaArmazenada = localStorage.getItem('motoapp-aba') as 'pool' | 'minhas' | null
+    if (abaArmazenada) {
+      setAba(abaArmazenada)
+    }
+  }, [])
+
+  const handleAbaChange = (novaAba: 'pool' | 'minhas') => {
+    setAba(novaAba)
+    localStorage.setItem('motoapp-aba', novaAba)
+  }
+
+  if (!mounted) return null
 
   return (
     <div className="pb-20">
       {/* Tabs */}
       <div className="sticky top-16 z-20 bg-white border-b border-gray-200 px-4 flex gap-0">
         <button
-          onClick={() => setAba('pool')}
+          onClick={() => handleAbaChange('pool')}
           className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
             aba === 'pool'
               ? 'text-orange-600 border-orange-600'
@@ -47,7 +63,7 @@ export function AppMotoTabs({ minhasEntregas, poolInicial, entregadorId }: Props
           🏍️ Pool
         </button>
         <button
-          onClick={() => setAba('minhas')}
+          onClick={() => handleAbaChange('minhas')}
           className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
             aba === 'minhas'
               ? 'text-orange-600 border-orange-600'

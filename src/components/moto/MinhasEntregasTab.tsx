@@ -13,6 +13,8 @@ interface EspetoMinha {
   status: string
   cliente: { nome: string; telefone: string | null; endereco: string; numero: string | null; bairro: string; referencia: string | null }
   pedido: { statusPagamento: string }
+  horarioApos?: string
+  horarioAte?: string
 }
 
 interface Props {
@@ -98,6 +100,9 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
                       <p className="text-gray-600 text-sm mt-1">{e.cliente.endereco}{e.cliente.numero ? `, ${e.cliente.numero}` : ''}</p>
                       <p className="text-gray-500 text-xs">{e.cliente.bairro}</p>
                       {e.cliente.referencia && <p className="text-gray-400 text-xs mt-1 italic">📍 {e.cliente.referencia}</p>}
+                      {(e as any).horarioApos && (
+                        <p className="text-blue-600 text-xs font-semibold mt-2">🕐 {(e as any).horarioApos} - {(e as any).horarioAte}</p>
+                      )}
                       <div className="mt-2">{pagamentoBadge(e.pedido.statusPagamento)}</div>
                     </div>
                     <div className="px-4 pb-2 flex gap-2">
@@ -148,6 +153,9 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
                       <p className="text-gray-600 text-sm mt-1">{e.cliente.endereco}{e.cliente.numero ? `, ${e.cliente.numero}` : ''}</p>
                       <p className="text-gray-500 text-xs">{e.cliente.bairro}</p>
                       {e.cliente.referencia && <p className="text-gray-400 text-xs mt-1 italic">📍 {e.cliente.referencia}</p>}
+                      {(e as any).horarioApos && (
+                        <p className="text-blue-600 text-xs font-semibold mt-2">🕐 {(e as any).horarioApos} - {(e as any).horarioAte}</p>
+                      )}
                       <div className="mt-2">{pagamentoBadge(e.pedido.statusPagamento)}</div>
                     </div>
                     <div className="px-4 pb-2 flex gap-2">

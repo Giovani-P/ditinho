@@ -88,18 +88,27 @@ export async function POST() {
       { apos: '18:00', ate: '20:00' },
     ]
 
+    // Calcular amanhã
+    const amanha = new Date(agora)
+    amanha.setUTCDate(amanha.getUTCDate() + 1)
+    const anoAmanha = amanha.getUTCFullYear()
+    const mesAmanha = String(amanha.getUTCMonth() + 1).padStart(2, '0')
+    const diaAmanha = String(amanha.getUTCDate()).padStart(2, '0')
+    const amanhaStr = `${anoAmanha}-${mesAmanha}-${diaAmanha}T00:00:00Z`
+
     for (let i = 0; i < 10; i++) {
+      const isAmanha = i >= 6
       const espeto = await prisma.espeto.create({
         data: {
           numero: Math.floor(1000 + Math.random() * 9000),
           pedidoId: pedidos[i].id,
           clienteId: clientes[i % 5].id,
           tipo: 'MOTO',
-          prioridade: i < 6 ? 'HOJE' : 'AMANHA',
+          prioridade: isAmanha ? 'AMANHA' : 'HOJE',
           status: 'PENDENTE',
           horarioApos: horarios[i % 6].apos,
           horarioAte: horarios[i % 6].ate,
-          createdAt: new Date(hojeStr),
+          createdAt: isAmanha ? new Date(amanhaStr) : new Date(hojeStr),
         },
       })
       espetos.push(espeto)

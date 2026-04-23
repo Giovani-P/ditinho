@@ -65,7 +65,22 @@ export default async function AppMotoPage() {
             <p className="text-orange-200 text-xs">🏍️ App Motoboy</p>
             <p className="font-bold text-lg">{session.user.name}</p>
           </div>
-          <LogoutButton />
+          <div className="flex items-center gap-2">
+            <a
+              href="/api/test/seed-pool"
+              onClick={(e) => {
+                e.preventDefault()
+                fetch('/api/test/seed-pool', { method: 'POST' })
+                  .then(() => window.location.reload())
+                  .catch(() => alert('Erro ao criar dados de teste'))
+              }}
+              className="text-xs opacity-50 hover:opacity-100 transition-opacity"
+              title="Criar dados de teste"
+            >
+              🧪
+            </a>
+            <LogoutButton />
+          </div>
         </div>
         <div className="flex gap-6">
           <div>

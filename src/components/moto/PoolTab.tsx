@@ -11,6 +11,8 @@ interface EspetoPool {
   cliente: { nome: string; telefone: string | null; endereco: string; numero: string | null; bairro: string; referencia: string | null }
   pedido: { statusPagamento: string }
   entregador: { user: { nome: string } } | null
+  horarioApos?: string
+  horarioAte?: string
 }
 
 interface Props {

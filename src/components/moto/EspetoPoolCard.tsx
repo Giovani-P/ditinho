@@ -13,6 +13,8 @@ interface EspetoPool {
   cliente: { nome: string; telefone: string | null; endereco: string; numero: string | null; bairro: string; referencia: string | null }
   pedido: { statusPagamento: string }
   entregador: { user: { nome: string } } | null
+  horarioApos?: string
+  horarioAte?: string
 }
 
 function pagamentoBadge(s: string) {
@@ -77,6 +79,9 @@ export function EspetoPoolCard({ espeto, onClaimed }: { espeto: EspetoPool; onCl
         </p>
         <p className="text-gray-500 text-xs">{espeto.cliente.bairro}</p>
         {espeto.cliente.referencia && <p className="text-gray-400 text-xs mt-1 italic">📍 {espeto.cliente.referencia}</p>}
+        {espeto.horarioApos && (
+          <p className="text-blue-600 text-xs font-semibold mt-2">🕐 {espeto.horarioApos} - {espeto.horarioAte}</p>
+        )}
         <div className="mt-2">{pagamentoBadge(espeto.pedido.statusPagamento)}</div>
       </div>
 
