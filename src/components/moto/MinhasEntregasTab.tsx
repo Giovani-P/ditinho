@@ -55,6 +55,18 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
     }
   }
 
+  const handleStatusChange = (espetoId: string, novoStatus: string) => {
+    if (novoStatus === 'EM_ROTA') {
+      // Atualizar status local
+      setEntregasAtualizadas(prev =>
+        prev.map(e => (e.id === espetoId ? { ...e, status: 'EM_ROTA' } : e))
+      )
+    } else if (novoStatus === 'ENTREGUE') {
+      // Remover da lista quando entregue
+      setEntregasAtualizadas(prev => prev.filter(e => e.id !== espetoId))
+    }
+  }
+
   return (
     <div className="space-y-4">
       {minhasEntregas.length === 0 ? (
@@ -99,7 +111,12 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
                       >🗺️ GPS</a>
                     </div>
                     <div className="px-4 pb-2">
-                      <ConfirmarEntregaButton espetoId={e.id} statusAtual={e.status} isMotoPool={false} />
+                      <ConfirmarEntregaButton
+                        espetoId={e.id}
+                        statusAtual={e.status}
+                        isMotoPool={false}
+                        onStatusChange={(novoStatus) => handleStatusChange(e.id, novoStatus)}
+                      />
                       <button
                         onClick={() => setEspetoTransferencia(e)}
                         className="w-full mt-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium py-2 rounded-lg transition-colors"
@@ -144,7 +161,12 @@ export function MinhasEntregasTab({ minhasEntregas }: Props) {
                       >🗺️ GPS</a>
                     </div>
                     <div className="px-4 pb-2">
-                      <ConfirmarEntregaButton espetoId={e.id} statusAtual={e.status} isMotoPool={false} />
+                      <ConfirmarEntregaButton
+                        espetoId={e.id}
+                        statusAtual={e.status}
+                        isMotoPool={false}
+                        onStatusChange={(novoStatus) => handleStatusChange(e.id, novoStatus)}
+                      />
                       <button
                         onClick={() => setEspetoTransferencia(e)}
                         className="w-full mt-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium py-2 rounded-lg transition-colors"

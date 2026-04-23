@@ -7,9 +7,10 @@ interface Props {
   espetoId: string
   statusAtual: string
   isMotoPool?: boolean
+  onStatusChange?: (novoStatus: string) => void
 }
 
-export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Props) {
+export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool, onStatusChange }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
@@ -48,6 +49,7 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'EM_ROTA' }),
       })
+      onStatusChange?.('EM_ROTA')
       router.refresh()
     } finally {
       setLoading(false)
@@ -63,6 +65,7 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
         body: JSON.stringify({ status: 'ENTREGUE' }),
       })
       setConfirmando(false)
+      onStatusChange?.('ENTREGUE')
       router.refresh()
     } finally {
       setLoading(false)
@@ -83,6 +86,7 @@ export function ConfirmarEntregaButton({ espetoId, statusAtual, isMotoPool }: Pr
       })
       setReportandoProblema(false)
       setDescricaoProblema('')
+      onStatusChange?.('PROBLEMA')
       router.refresh()
     } finally {
       setLoading(false)
