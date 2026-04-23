@@ -31,22 +31,22 @@ interface Props {
 
 export function AppMotoTabs({ minhasEntregas, poolInicial, entregadorId }: Props) {
   const [aba, setAba] = useState<'pool' | 'minhas'>('pool')
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-    const abaArmazenada = localStorage.getItem('motoapp-aba') as 'pool' | 'minhas' | null
-    if (abaArmazenada) {
-      setAba(abaArmazenada)
+    if (typeof window !== 'undefined') {
+      const abaArmazenada = localStorage.getItem('motoapp-aba') as 'pool' | 'minhas' | null
+      if (abaArmazenada) {
+        setAba(abaArmazenada)
+      }
     }
   }, [])
 
   const handleAbaChange = (novaAba: 'pool' | 'minhas') => {
     setAba(novaAba)
-    localStorage.setItem('motoapp-aba', novaAba)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('motoapp-aba', novaAba)
+    }
   }
-
-  if (!mounted) return null
 
   return (
     <div className="pb-20">
