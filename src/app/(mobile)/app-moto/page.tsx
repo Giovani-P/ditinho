@@ -3,6 +3,7 @@ use client
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { LogoutButton } from '@/components/entregador/LogoutButton'
+import { SeedPoolButton } from '@/components/moto/SeedPoolButton'
 import { AppMotoTabs } from '@/components/moto/AppMotoTabs'
 import { ReactQueryProvider } from '@/components/moto/ReactQueryProvider'
 
@@ -67,19 +68,7 @@ export default async function AppMotoPage() {
             <p className="font-bold text-lg">{session.user.name}</p>
           </div>
           <div className="flex items-center gap-2">
-            <a
-              href="/api/test/seed-pool"
-              onClick={(e) => {
-                e.preventDefault()
-                fetch('/api/test/seed-pool', { method: 'POST' })
-                  .then(() => window.location.reload())
-                  .catch(() => alert('Erro ao criar dados de teste'))
-              }}
-              className="text-xs opacity-50 hover:opacity-100 transition-opacity"
-              title="Criar dados de teste"
-            >
-              🧪
-            </a>
+            <SeedPoolButton />
             <LogoutButton />
           </div>
         </div>
