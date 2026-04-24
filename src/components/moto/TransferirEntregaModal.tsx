@@ -62,8 +62,8 @@ export function TransferirEntregaModal({ isOpen, onClose, onConfirm }: Props) {
 
       {/* Modal */}
       <div className="fixed inset-x-0 bottom-0 z-50 animate-in slide-in-from-bottom-4">
-        <div className="bg-white rounded-t-3xl px-4 py-6 max-h-[80vh] overflow-y-auto">
-          <div className="max-w-sm mx-auto">
+        <div className="bg-white rounded-t-3xl px-4 py-4 max-h-[65vh] overflow-y-auto">
+          <div className="max-w-sm mx-auto space-y-3">
             {/* Header */}
             <h2 className="text-xl font-bold text-gray-900 mb-6">Transferir entrega</h2>
 
@@ -103,7 +103,7 @@ export function TransferirEntregaModal({ isOpen, onClose, onConfirm }: Props) {
                   <button
                     onClick={handleConfirm}
                     disabled={!selecionado || loading}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white font-bold py-3 rounded-xl transition-colors"
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl transition-colors"
                   >
                     {loading ? 'Transferindo...' : '✓ Confirmar transferência'}
                   </button>

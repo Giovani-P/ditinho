@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Card, CardHeader, CardContent } from '@/components/ui/Card'
-import { EspetosTableClient } from '@/components/logistica/EspetosTableClient'
+import { EspetosTableWrapper } from '@/components/logistica/EspetosTableWrapper'
 import { SeedTestButton } from '@/components/logistica/SeedTestButton'
 import Link from 'next/link'
 
@@ -123,14 +123,15 @@ export default async function LogisticaPage({ searchParams }: Props) {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <EspetosTableClient
-            espetos={espetos as never}
+          <EspetosTableWrapper
+            espetosInicial={espetos as never}
             entregadores={entregadores.map(e => ({
               id: e.id,
               nome: e.user.nome,
               tipo: e.tipo,
               disponivel: e.disponivel,
             }))}
+            filtroStatus={filtroStatus}
           />
         </CardContent>
       </Card>

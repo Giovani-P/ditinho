@@ -41,8 +41,8 @@ export function PegarEntregaModal({ isOpen, espeto, onConfirm, onCancel }: Props
 
       {/* Modal */}
       <div className="fixed inset-x-0 bottom-0 z-50 animate-in slide-in-from-bottom-4">
-        <div className="bg-white rounded-t-3xl px-4 py-6 max-h-[80vh] overflow-y-auto">
-          <div className="max-w-sm mx-auto">
+        <div className="bg-white rounded-t-3xl px-4 py-4 max-h-[60vh] overflow-y-auto">
+          <div className="max-w-sm mx-auto space-y-4">
             {/* Header */}
             <div className="text-center mb-6">
               <p className="text-sm text-gray-500 mb-2">Confirmar entrega?</p>
