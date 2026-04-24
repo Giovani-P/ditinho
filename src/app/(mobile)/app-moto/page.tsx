@@ -60,26 +60,26 @@ export default async function AppMotoPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header laranja — identidade visual moto */}
-      <div className="bg-orange-500 text-white px-4 py-5 sticky top-0 z-10">
-        <div className="flex items-center justify-between mb-3">
-          <div>
+      <div className="bg-orange-500 text-white px-4 py-4 sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1">
             <p className="text-orange-200 text-xs">🏍️ App Motoboy</p>
             <p className="font-bold text-lg">{session.user.name}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <SeedPoolButton />
             <LogoutButton />
           </div>
         </div>
-        <div className="flex gap-6">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-orange-200 text-xs">Minhas entregas</p>
-            <p className="font-bold text-2xl">{totalEntregas}</p>
+            <p className="font-bold text-3xl">{totalEntregas}</p>
           </div>
           {livresNoPool.length > 0 && (
             <div>
               <p className="text-orange-200 text-xs">Disponíveis no pool</p>
-              <p className="font-bold text-2xl">{livresNoPool.length}</p>
+              <p className="font-bold text-3xl">{livresNoPool.length}</p>
             </div>
           )}
         </div>

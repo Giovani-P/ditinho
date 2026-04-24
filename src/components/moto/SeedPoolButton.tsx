@@ -30,10 +30,10 @@ export function SeedPoolButton() {
       <button
         onClick={handleCreateTestData}
         disabled={loading}
-        className="text-sm bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+        className="text-xs bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-2 py-1 rounded font-medium transition-colors whitespace-nowrap"
         title="Criar 10 espetos de teste para simulação"
       >
-        {loading ? '⏳ Criando...' : '🧪 Criar Testes'}
+        {loading ? '⏳' : '🧪'}
       </button>
       {msg && <span className="text-xs text-gray-600 whitespace-nowrap">{msg}</span>}
     </div>
