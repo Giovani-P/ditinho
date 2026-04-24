@@ -79,8 +79,10 @@ model Espeto {
   horarioAte        String?  // "entregar até" (ex: "12:00")
   descricaoProblema String?  // descrição obrigatória quando status=PROBLEMA
   observacoes       String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  startedAt         DateTime?  // quando entregador iniciou a rota (EM_ROTA)
+  completedAt       DateTime?  // quando entrega foi confirmada (ENTREGUE)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   pedido     Pedido      @relation(fields: [pedidoId], references: [id])
   cliente    Cliente     @relation(fields: [clienteId], references: [id])

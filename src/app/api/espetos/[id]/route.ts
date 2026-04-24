@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { notificarEntregaRealizada, notificarPedidoEmRota } from '@/lib/whatsapp'
 import { invalidateCache } from '@/lib/cache'
+import { registrarAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   req: NextRequest,
@@ -68,6 +69,9 @@ export async function PATCH(
       ...(horarioApos !== undefined ? { horarioApos } : {}),
       ...(horarioAte !== undefined ? { horarioAte } : {}),
       ...(itensRetirados !== undefined ? { itensRetirados } : {}),
+      // Registrar timestamps de inicio e conclusão
+      ...(status === 'EM_ROTA' && !espetoAtual?.startedAt ? { startedAt: new Date() } : {}),
+      ...(status === 'ENTREGUE' ? { completedAt: new Date() } : {}),
     },
     include: {
       cliente: { select: { nome: true, telefone: true } },
@@ -76,6 +80,18 @@ export async function PATCH(
       entrega: { select: { fotoUrl: true } },
     },
   })
+
+  // Registrar audit log se status mudou
+  if (status && status !== statusAnterior) {
+    await registrarAuditLog(
+      session.user.id,
+      `Status alterado: ${statusAnterior} → ${status}`,
+      'Espeto',
+      id,
+      statusAnterior || '',
+      status
+    )
+  }
 
   // Ao entregar: atualizar pedido + registrar data/hora de entrega
   if (status === 'ENTREGUE') {
